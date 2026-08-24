@@ -207,3 +207,32 @@ def test_margin_vs_best_other_is_not_gameable(scorer, sources):
     s = scorer.score(img)
     for label in ("cat", "dog", "other"):
         assert (s.margin_vs_best_other(label) > 0) == (s.pred == label)
+
+
+# --- classify.py utility ----------------------------------------------------
+
+def test_classify_cli_reports_probabilities(capsys):
+    import classify
+    rc = classify.main([str(HOMEWORK / "images" / "woman.jpg")])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "woman.jpg" in out and "other" in out
+    # probabilities, not logits, unless asked
+    assert "logit" not in out
+
+
+def test_classify_cli_json_and_logits(capsys):
+    import classify
+    rc = classify.main(["--json", "--logits", str(HOMEWORK / "images" / "woman.jpg")])
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert len(payload) == 1
+    row = payload[0]
+    assert row["pred"] == "other"
+    assert abs(sum(row["probs"].values()) - 1.0) < 1e-4
+    assert set(row["logits"]) == {"cat", "dog", "other"}
+
+
+def test_classify_cli_missing_file_exits_nonzero(capsys):
+    import classify
+    assert classify.main(["definitely_not_here.png"]) == 2

@@ -37,6 +37,19 @@ class Score:
     def prob(self, label: str) -> float:
         return self.probs[label]
 
+    def margin_vs_best_other(self, label: str) -> float:
+        """logit(label) - max(logit of every OTHER class).
+
+        This, not `margin(label, "other")`, is the correct search objective for a 3-class model.
+        Maximising `logit(cat) - logit(other)` can be satisfied by images the model calls `dog`
+        with near-certainty: cat beats "other" while dog takes all the probability mass. Measured
+        directly -- a cat-targeted run produced candidates at margin +7.15 with cat probability
+        0.0044, because they were confidently dog. Margin against the strongest *competitor*
+        cannot be gamed that way: it is positive only when `label` is actually winning.
+        """
+        competitors = [v for k, v in self.logits.items() if k != label]
+        return self.logits[label] - max(competitors)
+
     def margin(self, label: str, against: str = "other") -> float:
         """logit(label) - logit(against).
 

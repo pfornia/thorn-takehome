@@ -162,3 +162,48 @@ def test_search_finds_a_false_positive(scorer, tmp_path):
     assert all(b["pred"] == "other" for b in report["baseline"])
     assert list(tmp_path.glob("*.png")), "no output image written"
     assert list(tmp_path.glob("*__ORIGINAL.png")), "original not saved alongside"
+
+
+# --- target label is configurable (cat as well as dog) -----------------------
+
+def test_target_label_defaults_to_dog(scorer):
+    assert Search(scorer=scorer, verbose=False).label == "dog"
+
+
+def test_target_label_can_be_overridden(scorer):
+    assert Search(scorer=scorer, verbose=False, target_label="cat").label == "cat"
+
+
+def test_invalid_target_label_rejected(scorer):
+    with pytest.raises(ValueError, match="not in model labels"):
+        Search(scorer=scorer, verbose=False, target_label="giraffe")
+
+
+def test_candidate_prob_is_not_hardcoded_to_dog(scorer, sources):
+    from autosearch.search import Candidate
+    c = Candidate("degrade", {}, "x", scorer.score(sources[0]))
+    for label in ("cat", "dog", "other"):
+        assert c.prob(label) == c.score.probs[label]
+
+
+def test_search_can_target_cat(scorer, tmp_path):
+    """End-to-end run targeting `cat` rather than `dog`."""
+    search = Search(scorer=scorer, verbose=False, target_label="cat")
+    search.config["uf3"]["coarse"] = {"kind": ["gaussian"], "strength": [40, 80], "seed": [0]}
+    search.config["uf3"]["refine"] = {"numeric_deltas": {"strength": [20]}, "seeds": 2}
+    report = search.run("uf3", [HOMEWORK / "images" / "woman.jpg"], out_dir=tmp_path)
+    assert report["target_label"] == "cat"
+    # filenames should carry the targeted label, not a hardcoded 'dog'
+    assert any("cat" in p.name for p in tmp_path.glob("*.png"))
+
+
+def test_margin_vs_best_other_is_not_gameable(scorer, sources):
+    """Regression test for a real bug: ranking on margin-vs-'other' selected images
+    the model called `dog` with near-certainty when the target was `cat`, because
+    cat beat 'other' while dog took all the mass. Margin against the strongest
+    competitor is positive only when the target class actually wins."""
+    from autosearch.transforms import apply_transform
+    img = apply_transform("degrade", sources, {"kind": "gaussian", "strength": 160, "seed": 0})
+    s = scorer.score(img)
+    for label in ("cat", "dog", "other"):
+        assert (s.margin_vs_best_other(label) > 0) == (s.pred == label)

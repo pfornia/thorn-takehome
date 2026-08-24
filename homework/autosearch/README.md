@@ -12,6 +12,9 @@ Formalises the manual investigation (see `../../experiment-log.md`) into a repea
 # one complaint
 python -m autosearch --uf uf1 --images images/*.jpg --out results/
 
+# target `cat` instead of `dog` (HOMEWORK.md permits either)
+python -m autosearch --uf all --target-label cat --images images/*.jpg --out results_cat/
+
 # all three
 python -m autosearch --uf all --images images/*.jpg images/*.jpeg --out results/
 
@@ -86,9 +89,19 @@ The defaults encode findings from the manual investigation rather than being gue
 
 ## Objective function
 
-The search maximises the **logit margin** `logit(dog) − logit(other)`, not probability.
+The search maximises **`logit(target) − max(logit of every other class)`** — the margin against the
+strongest *competitor* — not probability, and not the margin against `other`.
 
-Probabilities saturate: four of the five provided base images score `dog = 0.000000`, which makes
+**Why not margin against `other`:** on a 3-class model that is gameable, and it was actually gamed.
+A cat-targeted run produced candidates reporting margin **+7.15** at cat probability **0.0044** —
+they were confidently `dog`, so cat beat `other` easily while dog held all the mass. Margin against
+the strongest competitor is positive if and only if the target class actually wins. The bug was
+invisible while targeting `dog` (dog is the natural attractor, so both objectives agreed) and only
+surfaced when the target changed.
+
+**Why not probability:**
+
+probabilities saturate. Four of the five provided base images score `dog = 0.000000`, which makes
 them indistinguishable and gives the search nothing to climb. In logit space those same images
 spread across a ~13-point range. Two reference points on this checkpoint: the model's no-evidence
 prior sits near **−2.5**, and **0.0** is a coin flip. A candidate that improves on its own baseline

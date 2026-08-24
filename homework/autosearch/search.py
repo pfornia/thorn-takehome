@@ -40,14 +40,20 @@ class Candidate:
     image_name: str
     score: Score = field(repr=False)
 
-    @property
-    def dog(self) -> float:
-        return self.score.probs["dog"]
+    def prob(self, label: str) -> float:
+        """Probability of the target class. Deliberately not hardcoded to `dog`:
+        the assignment permits false positives for `cat` as well."""
+        return self.score.probs[label]
 
     def objective(self, label: str) -> float:
-        return self.score.margin(label)
+        """Ranking objective: margin against the strongest competing class.
 
-    def summary(self, label: str = "dog") -> dict:
+        NOT `margin(label, "other")` -- see Score.margin_vs_best_other for why that is gameable
+        on a 3-class model.
+        """
+        return self.score.margin_vs_best_other(label)
+
+    def summary(self, label: str) -> dict:
         return {
             "transform": self.transform,
             "image": self.image_name,
@@ -55,6 +61,8 @@ class Candidate:
             "pred": self.score.pred,
             "probs": {k: round(v, 6) for k, v in self.score.probs.items()},
             "logit_margin_vs_other": round(self.score.margin(label), 4),
+            "logit_margin_vs_best_competitor": round(
+                self.score.margin_vs_best_other(label), 4),
         }
 
 
@@ -115,11 +123,15 @@ def _neighbors(params: dict, refine_cfg: dict, transform: str) -> list[dict]:
 
 class Search:
     def __init__(self, config_path: str | Path | None = None, scorer: Scorer | None = None,
-                 verbose: bool = True):
+                 verbose: bool = True, target_label: str | None = None):
         cfg_path = Path(config_path) if config_path else Path(__file__).parent / "config.json"
         self.config = json.loads(cfg_path.read_text())
         self.scorer = scorer or Scorer()
-        self.label = self.config.get("target_label", "dog")
+        # `cat` is a valid target too -- HOMEWORK.md permits false positives for either class
+        self.label = target_label or self.config.get("target_label", "dog")
+        if self.label not in self.scorer.labels:
+            raise ValueError(
+                f"target_label {self.label!r} not in model labels {self.scorer.labels}")
         self.target = float(self.config.get("target_prob", 0.99))
         self.verbose = verbose
 
@@ -169,7 +181,7 @@ class Search:
         self._log("\nbaseline (unmodified):")
         for (name, _), s in zip(loaded, base_scores):
             self._log(
-                f"  {name:<12} pred={s.pred:<6} dog={s.probs['dog']:.6f} "
+                f"  {name:<12} pred={s.pred:<6} {self.label}={s.probs[self.label]:.6f} "
                 f"margin={s.margin(self.label):+.2f}"
             )
 
@@ -182,7 +194,7 @@ class Search:
         best1 = results[0] if results else None
         self._log(f"  evaluated {len(results)} | {n_cross} predict '{self.label}'")
         if best1:
-            self._log(f"  best: {self.label}={best1.dog:.4f} margin={best1.objective(self.label):+.2f}")
+            self._log(f"  best: {self.label}={best1.prob(self.label):.4f} margin={best1.objective(self.label):+.2f}")
             self._log(f"        {best1.params}")
 
         # ---- stage 2: local refinement around the top-K ----
@@ -221,7 +233,7 @@ class Search:
             self._log(f"\nstage 2 (local refine): {total_neigh} new param sets across "
                       f"{len(refine_targets)} image(s)")
             self._log(f"  evaluated {len(refined)} | best: "
-                      f"{self.label}={refined[0].dog:.4f} "
+                      f"{self.label}={refined[0].prob(self.label):.4f} "
                       f"margin={refined[0].objective(self.label):+.2f}")
 
         allc = sorted(results + refined, key=lambda c: -c.objective(self.label))
@@ -238,19 +250,19 @@ class Search:
         self._log(f"\n{'-'*78}")
         if len(per_image_best) > 1:
             n_hit = sum(1 for c in per_image_best.values()
-                        if c.score.pred == self.label and c.dog >= self.target)
+                        if c.score.pred == self.label and c.prob(self.label) >= self.target)
             self._log(f"per-image best ({n_hit}/{len(per_image_best)} reached "
                       f"{self.label}>={self.target}):")
             for name, c in sorted(per_image_best.items(),
                                   key=lambda kv: -kv[1].objective(self.label)):
-                mark = "✅" if c.score.pred == self.label and c.dog >= self.target else (
+                mark = "✅" if c.score.pred == self.label and c.prob(self.label) >= self.target else (
                     "🟡" if c.score.pred == self.label else "❌")
-                self._log(f"  {mark} {name:<12} {self.label}={c.dog:.4f} "
+                self._log(f"  {mark} {name:<12} {self.label}={c.prob(self.label):.4f} "
                           f"margin={c.objective(self.label):+7.2f}  {c.params}")
 
         if best and best.score.pred == self.label:
-            hit = "✅ TARGET MET" if best.dog >= self.target else "⚠️  below target"
-            self._log(f"{hit}: {self.label}={best.dog:.4f} (target {self.target}) "
+            hit = "✅ TARGET MET" if best.prob(self.label) >= self.target else "⚠️  below target"
+            self._log(f"{hit}: {self.label}={best.prob(self.label):.4f} (target {self.target}) "
                       f"margin={best.objective(self.label):+.2f}")
         else:
             self._log(f"❌ no {self.label} prediction found")
@@ -263,7 +275,7 @@ class Search:
             "transform": transform,
             "target_label": self.label,
             "target_prob": self.target,
-            "target_met": bool(best and best.score.pred == self.label and best.dog >= self.target),
+            "target_met": bool(best and best.score.pred == self.label and best.prob(self.label) >= self.target),
             "candidates_scored": self.scorer.n_scored,
             "stage1_evaluated": len(results),
             "stage1_crossings": n_cross,
@@ -276,7 +288,7 @@ class Search:
             "per_image_best": {n: c.summary(self.label) for n, c in per_image_best.items()},
             "images_reaching_target": sum(
                 1 for c in per_image_best.values()
-                if c.score.pred == self.label and c.dog >= self.target
+                if c.score.pred == self.label and c.prob(self.label) >= self.target
             ),
             "images_total": len(per_image_best),
             "top": [c.summary(self.label) for c in allc[:top_k]],
@@ -290,7 +302,7 @@ class Search:
             for name, cand in per_image_best.items():
                 sources = gmap.get(name, base_imgs)
                 img = apply_transform(transform, sources, cand.params)
-                stem = f"{uf}_{name}_dog{cand.dog:.4f}"
+                stem = f"{uf}_{name}_{self.label}{cand.prob(self.label):.4f}"
                 img.save(out / f"{stem}.png")
                 if name in lmap:
                     lmap[name].save(out / f"{stem}__ORIGINAL.png")

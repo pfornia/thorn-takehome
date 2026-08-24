@@ -29,6 +29,9 @@ def main(argv=None):
     ap.add_argument("--config", default=None, help="path to config.json")
     ap.add_argument("--target", type=float, default=None,
                     help="target probability for the label (overrides config)")
+    ap.add_argument("--target-label", default=None, choices=["dog", "cat"],
+                    help="which class to induce a false positive for (default: config, 'dog'). "
+                         "HOMEWORK.md permits either 'dog' or 'cat'.")
     ap.add_argument("--top-k", type=int, default=5,
                     help="how many coarse results to refine around (default: 5)")
     ap.add_argument("--batch-size", type=int, default=64)
@@ -42,7 +45,8 @@ def main(argv=None):
         ap.error(f"image(s) not found: {', '.join(str(m) for m in missing)}")
 
     scorer = Scorer(device=args.device, batch_size=args.batch_size)
-    search = Search(config_path=args.config, scorer=scorer, verbose=not args.quiet)
+    search = Search(config_path=args.config, scorer=scorer, verbose=not args.quiet,
+                    target_label=args.target_label)
     if args.target is not None:
         search.target = args.target
 

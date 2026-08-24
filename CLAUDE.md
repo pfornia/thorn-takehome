@@ -79,6 +79,14 @@ misclassifications, rather than one-off manual edits.
 inside the personal-assistant working tree for workflow continuity, but **personal-assistant
 gitignores this folder** — commit and push from *here*, not from the parent repo.
 
+## ⚠️ Use PRs in this repo (Paul's preference, 2026-08-24)
+**Work on a branch and open a PR for changes here** — do not commit straight to `main`. This is
+specific to the Thorn repo, because it may be shared with Thorn; `personal-assistant` itself stays
+on the commit-directly-to-main workflow.
+
+Everything committed before 2026-08-24 went straight to `main` (7 commits) and was left as-is
+rather than retroactively branched.
+
 ## Status (2026-08-24)
 Investigation complete (E000–E011); all three complaints reproduce above the 99% tier, and the
 three candidates pass Thorn's provided `test_false_positives.py` at the hard threshold. Final

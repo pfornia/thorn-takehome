@@ -2,9 +2,10 @@
 
 Formalises the manual investigation (see `../../experiment-log.md`) into a repeatable pipeline.
 
-**Input:** a user complaint (`uf1` / `uf2` / `uf3`) and a list of base images.
-**Output:** a transformed image the classifier labels `dog` with probability ≥ target (default
-0.99), plus the original for comparison and a JSON report with before/after scores.
+**Input:** a user complaint (`uf1` / `uf2` / `uf3`), a list of base images, and a target class
+(`dog` or `cat`).
+**Output:** a transformed image the classifier labels as the target class with probability ≥ target
+(default 0.99), plus the original for comparison and a JSON report with before/after scores.
 
 ## Usage
 
@@ -19,6 +20,7 @@ python -m autosearch --uf all --target-label cat --images images/*.jpg --out res
 python -m autosearch --uf all --images images/*.jpg images/*.jpeg --out results/
 
 # useful flags
+--target-label cat # which class to induce (dog | cat; default dog, or config's target_label)
 --target 0.95      # override the target probability
 --top-k 8          # refine around more coarse results
 --batch-size 128   # larger batches if you have the memory
@@ -106,13 +108,24 @@ them indistinguishable and gives the search nothing to climb. In logit space tho
 spread across a ~13-point range. Two reference points on this checkpoint: the model's no-evidence
 prior sits near **−2.5**, and **0.0** is a coin flip. A candidate that improves on its own baseline
 but lands at −2.5 has merely had its information removed; only crossing *above* the prior is
-evidence of positive dog signal.
+evidence of positive signal for the target class.
 
 ## Reporting
 
-`results/report.json` records, per complaint: the baseline scores of the unmodified images, how
-many candidates were evaluated at each stage, how many crossed, the best result with its full
-parameter set, and the top-K.
+`results/report.json` records, per complaint: the target class, the baseline scores of the
+unmodified images, how many candidates were evaluated at each stage, how many crossed, the best
+result with its full parameter set, per-image bests, and the top-K.
+
+Setting the target class, in precedence order:
+
+| where | how |
+|---|---|
+| CLI | `--target-label cat` |
+| `config.json` | `"target_label": "cat"` |
+| Python | `Search(target_label="cat")` |
+
+Defaults to `dog`. The value is validated against the model's own label list, so a typo fails
+immediately rather than raising a `KeyError` partway through a run.
 
 **On reporting a seed-searched result honestly:** when the best candidate comes from searching N
 random seeds, say so and give the distribution, not just the maximum. "Crosses on 30/30 seeds,

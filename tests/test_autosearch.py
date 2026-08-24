@@ -10,11 +10,11 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from autosearch.scoring import Scorer
-from autosearch.search import Search, _expand_grid, _is_valid, _neighbors
-from autosearch.transforms import CANVAS, REGISTRY, apply_transform
+from stage2_autosearch.scoring import Scorer
+from stage2_autosearch.search import Search, _expand_grid, _is_valid, _neighbors
+from stage2_autosearch.transforms import CANVAS, REGISTRY, apply_transform
 
-HOMEWORK = Path(__file__).resolve().parent.parent
+HOMEWORK = Path(__file__).resolve().parent.parent / "homework"
 IMAGES = sorted(p for p in (HOMEWORK / "images").glob("*") if p.is_file())
 
 
@@ -31,7 +31,7 @@ def scorer():
 
 @pytest.fixture(scope="module")
 def config():
-    return json.loads((HOMEWORK / "autosearch" / "config.json").read_text())
+    return json.loads((HOMEWORK.parent / "stage2_autosearch" / "config.json").read_text())
 
 
 # --- transforms -------------------------------------------------------------

@@ -19,7 +19,7 @@ import statistics
 
 from PIL import Image, ImageDraw
 
-from score import HOMEWORK_DIR, score_image
+from score import HOMEWORK_DIR, OUTPUTS_DIR, score_image
 
 CANVAS = 512
 BASES = ["ocean.jpg", "woman.jpg", "forest.jpg", "man.jpeg", "rav4.jpg"]
@@ -68,7 +68,7 @@ def summarize(label, probs, preds):
 
 
 if __name__ == "__main__":
-    out_dir = HOMEWORK_DIR / "outputs" / "e010_seeds"
+    out_dir = OUTPUTS_DIR / "e010_seeds"
     out_dir.mkdir(parents=True, exist_ok=True)
     imgs = load_bases()
 

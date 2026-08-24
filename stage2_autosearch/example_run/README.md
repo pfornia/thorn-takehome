@@ -7,7 +7,7 @@
 Output of a full three-complaint search over all five provided base images:
 
 ```bash
-python -m autosearch --uf all --images images/*.jpg images/*.jpeg --out results/
+python -m stage2_autosearch --uf all --images images/*.jpg images/*.jpeg --out results/
 ```
 
 2,388 candidates scored in 6m07s (CPU/MPS). All three targets met.

@@ -10,7 +10,7 @@ Text *content* is known irrelevant (E001), so wording is held fixed except in on
 
 from PIL import Image, ImageDraw, ImageFont
 
-from score import HOMEWORK_DIR, score_image
+from score import HOMEWORK_DIR, OUTPUTS_DIR, score_image
 
 CANVAS = 512
 FONT = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
@@ -60,7 +60,7 @@ def single_wordmark(img, text="SAMPLE", font_size=90, opacity=0.5, color=(255, 2
 
 
 def run(label, variants, out_sub, bases=BASES):
-    out_dir = HOMEWORK_DIR / "outputs" / out_sub
+    out_dir = OUTPUTS_DIR / out_sub
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"\n{'='*118}\n{label}\n{'='*118}")
     hdr = f"{'variant':>26} | " + " | ".join(f"{b.split('.')[0]:>15}" for b in bases)

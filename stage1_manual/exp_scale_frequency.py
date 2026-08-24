@@ -18,7 +18,7 @@ Conditions per base image:
 
 from PIL import Image
 
-from score import HOMEWORK_DIR, score_image
+from score import HOMEWORK_DIR, OUTPUTS_DIR, score_image
 
 CANVAS = 512
 BASES = ["ocean.jpg", "woman.jpg", "forest.jpg", "man.jpeg", "rav4.jpg"]
@@ -54,7 +54,7 @@ def down_n(img: Image.Image, n: int) -> Image.Image:
 
 
 if __name__ == "__main__":
-    out_dir = HOMEWORK_DIR / "outputs" / "e006_scale"
+    out_dir = OUTPUTS_DIR / "e006_scale"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     print("E006 — spatial frequency vs content")

@@ -5,14 +5,22 @@ experiment (including failures) yields a usable signal about which direction a
 transformation moved the image.
 """
 
+import sys
 from pathlib import Path
 
 import torch
 from PIL import Image
 
-from model import MobileNetSmall
+# Thorn's model.py lives in homework/ and is left untouched; put it on the path rather than
+# copying it, so the provided module stays the single source of truth.
+REPO_ROOT = Path(__file__).resolve().parent.parent
+HOMEWORK_DIR = REPO_ROOT / "homework"
+sys.path.insert(0, str(HOMEWORK_DIR))
 
-HOMEWORK_DIR = Path(__file__).resolve().parent
+from model import MobileNetSmall  # noqa: E402
+
+# Generated images go to the repo-level outputs/, not inside homework/.
+OUTPUTS_DIR = REPO_ROOT / "outputs"
 _model = None
 
 

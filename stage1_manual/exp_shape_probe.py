@@ -15,7 +15,7 @@ import random
 
 from PIL import Image, ImageDraw, ImageFont
 
-from score import format_score, score_image
+from score import OUTPUTS_DIR, format_score, score_image
 
 MONO_FONT = "/System/Library/Fonts/Supplemental/Andale Mono.ttf"
 HOMEWORK_IMAGES = None  # set in __main__
@@ -138,7 +138,7 @@ def photo_mosaic(base_images, mask: Image.Image, grid: int = 16, size: int = CAN
 
 
 if __name__ == "__main__":
-    from score import HOMEWORK_DIR
+    from score import HOMEWORK_DIR, OUTPUTS_DIR
 
     print("E002 — SHAPE/SILHOUETTE probe (diagnostic only; these depict animals by design)")
     print("=" * 112)
@@ -159,7 +159,7 @@ if __name__ == "__main__":
         if p.is_file()
     ]
     mask = dog_silhouette_mask()
-    out_dir = HOMEWORK_DIR / "outputs"
+    out_dir = OUTPUTS_DIR
     out_dir.mkdir(exist_ok=True)
 
     for grid in (8, 16, 32, 64):

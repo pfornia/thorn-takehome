@@ -1,7 +1,7 @@
 """CLI entry point.
 
-    python -m autosearch --uf uf1 --images images/*.jpg --out results/
-    python -m autosearch --uf all --images images/*.jpg --out results/ --target 0.99
+    python -m stage2_autosearch --uf uf1 --images images/*.jpg --out results/
+    python -m stage2_autosearch --uf all --images images/*.jpg --out results/ --target 0.99
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ from .search import Search
 
 def main(argv=None):
     ap = argparse.ArgumentParser(
-        prog="autosearch",
+        prog="stage2_autosearch",
         description="Search for non-adversarial transformations that induce false-positive "
                     "cat/dog predictions, guided by the three user complaints.",
     )

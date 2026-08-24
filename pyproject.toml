@@ -1,0 +1,22 @@
+[project]
+name = "thorn-takehome"
+version = "0.1.0"
+description = "False-positive investigation for Thorn's cat/dog/other image classifier"
+requires-python = ">=3.10"
+# Deliberately identical to the dependency set Thorn pinned in homework/pyproject.toml.
+# Thorn re-runs this code to verify scores, so nothing outside their environment is added.
+dependencies = [
+    "torch",
+    "torchvision",
+    "pillow",
+    "pytest",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+# "." makes stage2_autosearch importable; "homework" makes Thorn's model.py importable
+# as `from model import ...` without copying or modifying it.
+pythonpath = [".", "homework"]
+testpaths = ["tests"]

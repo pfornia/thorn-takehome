@@ -20,7 +20,7 @@ import itertools
 
 from PIL import Image, ImageDraw, ImageFont
 
-from score import HOMEWORK_DIR, score_image
+from score import HOMEWORK_DIR, OUTPUTS_DIR, score_image
 
 CANVAS = 512
 SPACING = 20
@@ -73,7 +73,7 @@ def watermark(img, text="© SAMPLE", font_file="Arial.ttf", font_size=14, spacin
 
 def sweep(label, base_name, param_grid, fixed, out_sub, top_n=8):
     """param_grid: dict of name -> list of values. Cartesian product."""
-    out_dir = HOMEWORK_DIR / "outputs" / out_sub
+    out_dir = OUTPUTS_DIR / out_sub
     out_dir.mkdir(parents=True, exist_ok=True)
     base = load_base(base_name)
     keys = list(param_grid)

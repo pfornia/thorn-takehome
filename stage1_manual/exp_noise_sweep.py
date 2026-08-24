@@ -13,7 +13,7 @@ Three parameterisations:
 import numpy as np
 from PIL import Image
 
-from score import HOMEWORK_DIR, score_image
+from score import HOMEWORK_DIR, OUTPUTS_DIR, score_image
 
 CANVAS = 512
 BASES = ["ocean.jpg", "woman.jpg", "forest.jpg", "man.jpeg", "rav4.jpg"]
@@ -48,7 +48,7 @@ def salt_pepper(img: Image.Image, density: float, seed: int = 0) -> Image.Image:
 
 
 def run_sweep(label, fn, values, out_sub, bases=BASES):
-    out_dir = HOMEWORK_DIR / "outputs" / out_sub
+    out_dir = OUTPUTS_DIR / out_sub
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"\n{'='*116}\n{label}\n{'='*116}")
     header = f"{'value':>8} | " + " | ".join(f"{b.split('.')[0]:>22}" for b in bases)

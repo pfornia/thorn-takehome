@@ -1132,9 +1132,24 @@ wrong, which is exactly the failure mode the assignment's own false-positive pro
 
 **UF1 (collage), cat:** best **0.9804** — close, but short of 0.99.
 
-**Finding 1 — 🔥 `cat` is materially harder to induce than `dog`.** Best cat results are ~0.98
-against dog's 1.0000, and *nothing* reached the 99% tier for cat, while dog cleared it on all three
-complaints and on 4/5 images for UF3. Same transformations, same images, same search budget.
+**UF2 (watermark), cat:** **2/5 reach 0.99**
+
+| image | cat | transformation |
+|---|---|---|
+| woman | **0.9978** ✅ | Arial 14pt, spacing 16, op 0.85, white, **0°** |
+| forest | **0.9963** ✅ | Copperplate 18pt, spacing 18, op 0.6, white, **0°** |
+| rav4 | 0.9448 🟡 | Copperplate 18pt, spacing 18, op 0.6, white, 30° |
+| man | 0.6044 🟡 | Copperplate 20pt, spacing 20, op 0.85, black, 0° |
+| ocean | 0.2664 ❌ | Arial 15pt, spacing 20, op 0.4, black, 60° |
+
+**⚠️ Correction.** An earlier draft of this entry claimed "*nothing* reached the 99% tier for cat."
+That was written before the UF2 cat run finished and is **wrong** — UF2 clears 0.99 for cat on two
+images. The corrected claim is narrower and still holds: cat is harder than dog, and cat reaches the
+hard tier on **only one of the three complaints** (watermarks), whereas dog reaches it on all three.
+
+**Finding 1 — 🔥 `cat` is harder to induce than `dog`, but not impossible.** Dog clears the 99% tier
+on all three complaints; cat clears it only via UF2 watermarks, and falls short on UF1 (0.980) and
+UF3 (best 0.977). Same transformations, images, and search budget.
 
 This is direct evidence for the frozen-backbone thesis, and arguably the cleanest available:
 **ImageNet-1k contains roughly 120 dog-breed classes but only about 7 cat classes.** The frozen
@@ -1143,9 +1158,17 @@ so generic high-frequency texture has a much shorter path to "dog" than to "cat"
 visible from the very first baseline (E000: dog > cat on all five untouched images) and holds all
 the way through to the automated searches.
 
-**Finding 2 — the per-image ordering changes again under a different target.** For cat, `rav4` is
-the *best* substrate (0.977) and `forest` the worst (0.178). Under dog+UF3, rav4 and forest were
-both ≥ 0.998. Susceptibility depends on the transformation *and* the target class.
+**Finding 2 — the per-image ordering changes again under a different target.** Under UF3+cat, `rav4`
+is the *best* substrate (0.977) and `forest` the worst (0.178); under UF3+dog both were ≥ 0.998.
+Under UF2, `ocean` reaches 0.95 for dog but only 0.27 for cat, while `forest` goes the other way
+(0.988 dog → 0.996 cat). **Susceptibility depends on the transformation AND the target class**, not
+on the image alone.
+
+**Finding 3 — 🔄 the optimal rotation angle flips with the target class.** Dog+UF2 peaked at
+**60–75°** (0° was among the worst). Cat+UF2 peaks at **0°** on both winners. Same transformation
+family, same images, opposite parameter preference depending only on which class is being induced.
+Strong evidence that these are two genuinely different frequency signatures in the frozen feature
+space, not one generic "animal texture" direction that both classes share.
 
 **Practical conclusion:** stick with `dog` for the deliverables. It is what the submission bullet
 asks for, it clears the hard tier comfortably, and the cat results are better used as *evidence*

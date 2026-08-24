@@ -1,0 +1,253 @@
+{
+  "user_feedback": "uf3",
+  "name": "UF3 - messy, hard to make out, low quality",
+  "complaint": "The model is flagging lots of messy looking images that are hard to make out and sort of low quality. The predictions are basically never right on these",
+  "transform": "degrade",
+  "target_label": "cat",
+  "target_prob": 0.99,
+  "target_met": false,
+  "candidates_scored": 695,
+  "stage1_evaluated": 220,
+  "stage1_crossings": 1,
+  "stage2_evaluated": 470,
+  "baseline": [
+    {
+      "image": "forest",
+      "pred": "other",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.0,
+        "other": 1.0
+      }
+    },
+    {
+      "image": "ocean",
+      "pred": "other",
+      "probs": {
+        "cat": 5e-06,
+        "dog": 7e-06,
+        "other": 0.999988
+      }
+    },
+    {
+      "image": "rav4",
+      "pred": "other",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.0,
+        "other": 1.0
+      }
+    },
+    {
+      "image": "woman",
+      "pred": "other",
+      "probs": {
+        "cat": 0.0,
+        "dog": 1e-06,
+        "other": 0.999999
+      }
+    },
+    {
+      "image": "man",
+      "pred": "other",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.0,
+        "other": 1.0
+      }
+    }
+  ],
+  "best": {
+    "transform": "degrade",
+    "image": "rav4",
+    "params": {
+      "kind": "gaussian",
+      "strength": 160,
+      "seed": 391185
+    },
+    "pred": "cat",
+    "probs": {
+      "cat": 0.977136,
+      "dog": 0.017259,
+      "other": 0.005605
+    },
+    "logit_margin_vs_other": 5.161,
+    "logit_margin_vs_best_competitor": 4.0363
+  },
+  "per_image_best": {
+    "rav4": {
+      "transform": "degrade",
+      "image": "rav4",
+      "params": {
+        "kind": "gaussian",
+        "strength": 160,
+        "seed": 391185
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.977136,
+        "dog": 0.017259,
+        "other": 0.005605
+      },
+      "logit_margin_vs_other": 5.161,
+      "logit_margin_vs_best_competitor": 4.0363
+    },
+    "man": {
+      "transform": "degrade",
+      "image": "man",
+      "params": {
+        "kind": "gaussian",
+        "strength": 180,
+        "seed": 1
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.914249,
+        "dog": 0.079245,
+        "other": 0.006506
+      },
+      "logit_margin_vs_other": 4.9454,
+      "logit_margin_vs_best_competitor": 2.4456
+    },
+    "ocean": {
+      "transform": "degrade",
+      "image": "ocean",
+      "params": {
+        "kind": "gaussian",
+        "strength": 120,
+        "seed": 10663
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.84815,
+        "dog": 0.149136,
+        "other": 0.002713
+      },
+      "logit_margin_vs_other": 5.7448,
+      "logit_margin_vs_best_competitor": 1.7382
+    },
+    "woman": {
+      "transform": "degrade",
+      "image": "woman",
+      "params": {
+        "kind": "gaussian",
+        "strength": 180,
+        "seed": 1
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.610586,
+        "dog": 0.387774,
+        "other": 0.001641
+      },
+      "logit_margin_vs_other": 5.9193,
+      "logit_margin_vs_best_competitor": 0.454
+    },
+    "forest": {
+      "transform": "degrade",
+      "image": "forest",
+      "params": {
+        "kind": "gaussian",
+        "strength": 120,
+        "seed": 391185
+      },
+      "pred": "other",
+      "probs": {
+        "cat": 0.177579,
+        "dog": 0.292322,
+        "other": 0.5301
+      },
+      "logit_margin_vs_other": -1.0937,
+      "logit_margin_vs_best_competitor": -1.0937
+    }
+  },
+  "images_reaching_target": 0,
+  "images_total": 5,
+  "top": [
+    {
+      "transform": "degrade",
+      "image": "rav4",
+      "params": {
+        "kind": "gaussian",
+        "strength": 160,
+        "seed": 391185
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.977136,
+        "dog": 0.017259,
+        "other": 0.005605
+      },
+      "logit_margin_vs_other": 5.161,
+      "logit_margin_vs_best_competitor": 4.0363
+    },
+    {
+      "transform": "degrade",
+      "image": "rav4",
+      "params": {
+        "kind": "gaussian",
+        "strength": 160,
+        "seed": 203068
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.965727,
+        "dog": 0.018265,
+        "other": 0.016009
+      },
+      "logit_margin_vs_other": 4.0998,
+      "logit_margin_vs_best_competitor": 3.9679
+    },
+    {
+      "transform": "degrade",
+      "image": "rav4",
+      "params": {
+        "kind": "gaussian",
+        "strength": 160,
+        "seed": 130303
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.961196,
+        "dog": 0.004902,
+        "other": 0.033902
+      },
+      "logit_margin_vs_other": 3.3447,
+      "logit_margin_vs_best_competitor": 3.3447
+    },
+    {
+      "transform": "degrade",
+      "image": "rav4",
+      "params": {
+        "kind": "gaussian",
+        "strength": 160,
+        "seed": 436857
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.92828,
+        "dog": 0.069715,
+        "other": 0.002005
+      },
+      "logit_margin_vs_other": 6.1377,
+      "logit_margin_vs_best_competitor": 2.5889
+    },
+    {
+      "transform": "degrade",
+      "image": "man",
+      "params": {
+        "kind": "gaussian",
+        "strength": 180,
+        "seed": 1
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.914249,
+        "dog": 0.079245,
+        "other": 0.006506
+      },
+      "logit_margin_vs_other": 4.9454,
+      "logit_margin_vs_best_competitor": 2.4456
+    }
+  ]
+}

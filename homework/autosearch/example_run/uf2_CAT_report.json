@@ -1,0 +1,286 @@
+{
+  "user_feedback": "uf2",
+  "name": "UF2 - watermarks and text",
+  "complaint": "A bunch of the images in my review queue have watermarks and text in them and almost none of them are actually actionable",
+  "transform": "watermark",
+  "target_label": "cat",
+  "target_prob": 0.99,
+  "target_met": true,
+  "candidates_scored": 2030,
+  "stage1_evaluated": 1620,
+  "stage1_crossings": 11,
+  "stage2_evaluated": 405,
+  "baseline": [
+    {
+      "image": "forest",
+      "pred": "other",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.0,
+        "other": 1.0
+      }
+    },
+    {
+      "image": "ocean",
+      "pred": "other",
+      "probs": {
+        "cat": 5e-06,
+        "dog": 7e-06,
+        "other": 0.999988
+      }
+    },
+    {
+      "image": "rav4",
+      "pred": "other",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.0,
+        "other": 1.0
+      }
+    },
+    {
+      "image": "woman",
+      "pred": "other",
+      "probs": {
+        "cat": 0.0,
+        "dog": 1e-06,
+        "other": 0.999999
+      }
+    },
+    {
+      "image": "man",
+      "pred": "other",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.0,
+        "other": 1.0
+      }
+    }
+  ],
+  "best": {
+    "transform": "watermark",
+    "image": "woman",
+    "params": {
+      "font": "Arial.ttf",
+      "font_size": 14,
+      "spacing": 16,
+      "opacity": 0.85,
+      "color": "white",
+      "angle": 0
+    },
+    "pred": "cat",
+    "probs": {
+      "cat": 0.997801,
+      "dog": 0.000831,
+      "other": 0.001368
+    },
+    "logit_margin_vs_other": 6.5919,
+    "logit_margin_vs_best_competitor": 6.5919
+  },
+  "per_image_best": {
+    "woman": {
+      "transform": "watermark",
+      "image": "woman",
+      "params": {
+        "font": "Arial.ttf",
+        "font_size": 14,
+        "spacing": 16,
+        "opacity": 0.85,
+        "color": "white",
+        "angle": 0
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.997801,
+        "dog": 0.000831,
+        "other": 0.001368
+      },
+      "logit_margin_vs_other": 6.5919,
+      "logit_margin_vs_best_competitor": 6.5919
+    },
+    "forest": {
+      "transform": "watermark",
+      "image": "forest",
+      "params": {
+        "font": "Copperplate.ttc",
+        "font_size": 18,
+        "spacing": 18,
+        "opacity": 0.6,
+        "color": "white",
+        "angle": 0
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.99626,
+        "dog": 0.000854,
+        "other": 0.002886
+      },
+      "logit_margin_vs_other": 5.8442,
+      "logit_margin_vs_best_competitor": 5.8442
+    },
+    "rav4": {
+      "transform": "watermark",
+      "image": "rav4",
+      "params": {
+        "font": "Copperplate.ttc",
+        "font_size": 18,
+        "spacing": 18,
+        "opacity": 0.6,
+        "color": "white",
+        "angle": 30
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.944808,
+        "dog": 8e-06,
+        "other": 0.055183
+      },
+      "logit_margin_vs_other": 2.8403,
+      "logit_margin_vs_best_competitor": 2.8403
+    },
+    "man": {
+      "transform": "watermark",
+      "image": "man",
+      "params": {
+        "font": "Copperplate.ttc",
+        "font_size": 20,
+        "spacing": 20,
+        "opacity": 0.85,
+        "color": "black",
+        "angle": 0
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.604431,
+        "dog": 0.00258,
+        "other": 0.39299
+      },
+      "logit_margin_vs_other": 0.4305,
+      "logit_margin_vs_best_competitor": 0.4305
+    },
+    "ocean": {
+      "transform": "watermark",
+      "image": "ocean",
+      "params": {
+        "font": "Arial.ttf",
+        "font_size": 15,
+        "spacing": 20,
+        "opacity": 0.4,
+        "color": "black",
+        "angle": 60
+      },
+      "pred": "other",
+      "probs": {
+        "cat": 0.266428,
+        "dog": 0.082624,
+        "other": 0.650948
+      },
+      "logit_margin_vs_other": -0.8933,
+      "logit_margin_vs_best_competitor": -0.8933
+    }
+  },
+  "images_reaching_target": 2,
+  "images_total": 5,
+  "top": [
+    {
+      "transform": "watermark",
+      "image": "woman",
+      "params": {
+        "font": "Arial.ttf",
+        "font_size": 14,
+        "spacing": 16,
+        "opacity": 0.85,
+        "color": "white",
+        "angle": 0
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.997801,
+        "dog": 0.000831,
+        "other": 0.001368
+      },
+      "logit_margin_vs_other": 6.5919,
+      "logit_margin_vs_best_competitor": 6.5919
+    },
+    {
+      "transform": "watermark",
+      "image": "woman",
+      "params": {
+        "font": "Copperplate.ttc",
+        "font_size": 14,
+        "spacing": 16,
+        "opacity": 0.85,
+        "color": "white",
+        "angle": 0
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.997923,
+        "dog": 0.001418,
+        "other": 0.000659
+      },
+      "logit_margin_vs_other": 7.3225,
+      "logit_margin_vs_best_competitor": 6.5565
+    },
+    {
+      "transform": "watermark",
+      "image": "woman",
+      "params": {
+        "font": "Copperplate.ttc",
+        "font_size": 16,
+        "spacing": 20,
+        "opacity": 0.85,
+        "color": "white",
+        "angle": 0
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.997824,
+        "dog": 0.001611,
+        "other": 0.000566
+      },
+      "logit_margin_vs_other": 7.4754,
+      "logit_margin_vs_best_competitor": 6.429
+    },
+    {
+      "transform": "watermark",
+      "image": "forest",
+      "params": {
+        "font": "Copperplate.ttc",
+        "font_size": 18,
+        "spacing": 18,
+        "opacity": 0.6,
+        "color": "white",
+        "angle": 0
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.99626,
+        "dog": 0.000854,
+        "other": 0.002886
+      },
+      "logit_margin_vs_other": 5.8442,
+      "logit_margin_vs_best_competitor": 5.8442
+    },
+    {
+      "transform": "watermark",
+      "image": "woman",
+      "params": {
+        "font": "Copperplate.ttc",
+        "font_size": 17,
+        "spacing": 20,
+        "opacity": 0.6,
+        "color": "white",
+        "angle": 0
+      },
+      "pred": "cat",
+      "probs": {
+        "cat": 0.988906,
+        "dog": 0.001877,
+        "other": 0.009217
+      },
+      "logit_margin_vs_other": 4.6756,
+      "logit_margin_vs_best_competitor": 4.6756
+    }
+  ]
+}

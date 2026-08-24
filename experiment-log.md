@@ -1036,3 +1036,57 @@ FALSE_POSITIVE_DIR=deliverables/ pytest tests/test_false_positives.py   # 4 pass
 Plus 22 tests for the pipeline itself, including one asserting batched scoring agrees with
 one-at-a-time scoring, and one asserting transforms are deterministic so any reported result is
 reproducible from its recorded parameters and seed.
+
+---
+
+### E013 — Per-image coverage: can EVERY base image be pushed to a dog FP? (2026-08-24)
+
+Paul's question: rather than one winner per complaint, get a false positive for *each* of the five
+base images.
+
+Required a pipeline change first. Stage 2 previously refined only around the single globally-best
+candidate, so one strong image monopolised refinement and the rest were never tuned. It now refines
+around **each image's own top-K**, writes a winner per input, and reports per-image coverage.
+(Running the CLI once per image instead would work but is much slower — the watermark layer cache
+can't be shared across separate processes, ~7 min/image vs ~6 min total.)
+
+#### UF3 — degradation: **4/5 images ≥ 0.99**, whole run 16 seconds
+
+| image | dog | transformation |
+|---|---|---|
+| man | **1.0000** | gaussian σ=120 |
+| woman | **0.9998** | gaussian σ=160 |
+| rav4 | **0.9989** | uniform_blend α=0.8 |
+| forest | **0.9980** | uniform_blend α=0.8 |
+| ocean | 0.8445 🟡 | gaussian σ=120 |
+
+#### UF2 — watermark: **2/5 ≥ 0.99**, 4/5 cross to `dog`, run 5m48s
+
+| image | dog | transformation |
+|---|---|---|
+| woman | **1.0000** | Courier New 10pt, spacing 20, op 0.85, white, 70° |
+| man | **0.9956** | Copperplate 14pt, spacing 20, op 0.6, white, 60° |
+| forest | 0.9877 🟡 | Arial 14pt, spacing 16, op 0.85, white, 0° |
+| ocean | 0.9497 🟡 | Arial 20pt, spacing 20, op 0.85, black, 0° |
+| rav4 | **0.1164 ❌** | best found; never crosses |
+
+**Finding 1 — the search generalises across images, but not uniformly.** UF3 reaches the hard tier
+on 4/5; UF2 on 2/5 with two more in the 0.95–0.99 band. Every image except one can be pushed to a
+confident dog prediction by at least one of the two transformations.
+
+**Finding 2 — 🔄 the two holdouts are DIFFERENT images, and it's the expected inversion.**
+`ocean` is the UF3 laggard (0.84) but reaches 0.95 on watermarks; `rav4` is fine under noise
+(0.9989) but **fails watermarks entirely** (0.1164, never crosses). Sixth independent confirmation
+that susceptibility is transformation-specific. Practically: **no single image is robust, and no
+single transformation covers every image** — a platform can't defend by hardening against one
+artefact type.
+
+**Finding 3 — `ocean` is the most resistant image overall**, consistent with everything since E000
+(it needed σ=60 vs woman's σ=40, never crossed as a single-source collage, and now tops out at 0.84
+under noise). Its content is smooth gradients with little fine detail, so there is less existing
+high-frequency structure for a transformation to amplify. The complement of the texture thesis.
+
+**Finding 4 — stage 2 does most of the work on the hard cases.** UF3 stage 1 best was 0.9995 on the
+easiest image; the per-image refinement is what lifted man to 1.0000 and rav4/forest above 0.99.
+For UF2, stage 2 evaluated 426 additional configs across the five images and produced the winner
+(+14.38 vs stage 1's best).

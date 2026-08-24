@@ -186,34 +186,68 @@ class Search:
             self._log(f"        {best1.params}")
 
         # ---- stage 2: local refinement around the top-K ----
-        seeds_for_refine = results[:top_k]
-        neigh: list[dict] = []
-        seen = {json.dumps(c.params, sort_keys=True, default=str) for c in results}
-        for c in seeds_for_refine:
-            for p in _neighbors(c.params, block.get("refine", {}), transform):
-                key = json.dumps(p, sort_keys=True, default=str)
-                if key not in seen:
-                    seen.add(key)
-                    neigh.append(p)
+        # For per-image transforms, refine around each image's OWN best rather than only the
+        # global best. Otherwise a single strong image monopolises stage 2 and the others never
+        # get refined -- and the goal is usually a false positive for every input, not just one.
+        if per_image:
+            per_img_best: dict[str, list[Candidate]] = {}
+            for c in results:
+                per_img_best.setdefault(c.image_name, []).append(c)
+            refine_targets = [
+                (name, cs[:top_k]) for name, cs in per_img_best.items()
+            ]
+        else:
+            refine_targets = [(best1.image_name, results[:top_k])] if best1 else []
 
         refined: list[Candidate] = []
-        if neigh:
-            self._log(f"\nstage 2 (local refine around top {len(seeds_for_refine)}): "
-                      f"{len(neigh)} new param sets")
-            # refine only against the image that produced the best coarse result
-            best_group = [g for g in groups if g[0] == best1.image_name] or groups
-            refined = self._evaluate(transform, neigh, best_group)
+        seen = {json.dumps(c.params, sort_keys=True, default=str) for c in results}
+        total_neigh = 0
+        for img_name, seeds_for_refine in refine_targets:
+            neigh: list[dict] = []
+            for c in seeds_for_refine:
+                for p in _neighbors(c.params, block.get("refine", {}), transform):
+                    key = f"{img_name}|" + json.dumps(p, sort_keys=True, default=str)
+                    if key not in seen:
+                        seen.add(key)
+                        neigh.append(p)
+            if not neigh:
+                continue
+            total_neigh += len(neigh)
+            group = [g for g in groups if g[0] == img_name] or groups
+            refined.extend(self._evaluate(transform, neigh, group))
+
+        if refined:
             refined.sort(key=lambda c: -c.objective(self.label))
-            if refined:
-                self._log(f"  evaluated {len(refined)} | best: "
-                          f"{self.label}={refined[0].dog:.4f} "
-                          f"margin={refined[0].objective(self.label):+.2f}")
+            self._log(f"\nstage 2 (local refine): {total_neigh} new param sets across "
+                      f"{len(refine_targets)} image(s)")
+            self._log(f"  evaluated {len(refined)} | best: "
+                      f"{self.label}={refined[0].dog:.4f} "
+                      f"margin={refined[0].objective(self.label):+.2f}")
 
         allc = sorted(results + refined, key=lambda c: -c.objective(self.label))
         winners = [c for c in allc if c.score.pred == self.label]
         best = winners[0] if winners else (allc[0] if allc else None)
 
+        # best result per input image, so a run reports coverage rather than a single winner
+        per_image_best: dict[str, Candidate] = {}
+        for c in allc:
+            cur = per_image_best.get(c.image_name)
+            if cur is None or c.objective(self.label) > cur.objective(self.label):
+                per_image_best[c.image_name] = c
+
         self._log(f"\n{'-'*78}")
+        if len(per_image_best) > 1:
+            n_hit = sum(1 for c in per_image_best.values()
+                        if c.score.pred == self.label and c.dog >= self.target)
+            self._log(f"per-image best ({n_hit}/{len(per_image_best)} reached "
+                      f"{self.label}>={self.target}):")
+            for name, c in sorted(per_image_best.items(),
+                                  key=lambda kv: -kv[1].objective(self.label)):
+                mark = "✅" if c.score.pred == self.label and c.dog >= self.target else (
+                    "🟡" if c.score.pred == self.label else "❌")
+                self._log(f"  {mark} {name:<12} {self.label}={c.dog:.4f} "
+                          f"margin={c.objective(self.label):+7.2f}  {c.params}")
+
         if best and best.score.pred == self.label:
             hit = "✅ TARGET MET" if best.dog >= self.target else "⚠️  below target"
             self._log(f"{hit}: {self.label}={best.dog:.4f} (target {self.target}) "
@@ -239,21 +273,29 @@ class Search:
                 for (n, _), s in zip(loaded, base_scores)
             ],
             "best": best.summary(self.label) if best else None,
+            "per_image_best": {n: c.summary(self.label) for n, c in per_image_best.items()},
+            "images_reaching_target": sum(
+                1 for c in per_image_best.values()
+                if c.score.pred == self.label and c.dog >= self.target
+            ),
+            "images_total": len(per_image_best),
             "top": [c.summary(self.label) for c in allc[:top_k]],
         }
 
         if out_dir and best:
             out = Path(out_dir)
             out.mkdir(parents=True, exist_ok=True)
-            sources = dict(groups)[best.image_name] if best.image_name in dict(groups) else base_imgs
-            img = apply_transform(transform, sources, best.params)
-            stem = f"{uf}_{best.image_name}_dog{best.dog:.4f}"
-            img.save(out / f"{stem}.png")
-            # pair the original alongside, as the submission requires
-            if best.image_name != "__mixed__":
-                dict(loaded)[best.image_name].save(out / f"{stem}__ORIGINAL.png")
-            (out / f"{stem}.json").write_text(json.dumps(report, indent=2))
-            report["output_image"] = str(out / f"{stem}.png")
-            self._log(f"saved: {out / (stem + '.png')}")
+            gmap, lmap = dict(groups), dict(loaded)
+            # write the winner for EVERY input image, not just the global best
+            for name, cand in per_image_best.items():
+                sources = gmap.get(name, base_imgs)
+                img = apply_transform(transform, sources, cand.params)
+                stem = f"{uf}_{name}_dog{cand.dog:.4f}"
+                img.save(out / f"{stem}.png")
+                if name in lmap:
+                    lmap[name].save(out / f"{stem}__ORIGINAL.png")
+            (out / f"{uf}_report.json").write_text(json.dumps(report, indent=2))
+            report["output_dir"] = str(out)
+            self._log(f"saved {len(per_image_best)} image(s) to: {out}")
 
         return report

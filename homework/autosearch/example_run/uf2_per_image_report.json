@@ -1,0 +1,275 @@
+{
+  "user_feedback": "uf2",
+  "name": "UF2 - watermarks and text",
+  "complaint": "A bunch of the images in my review queue have watermarks and text in them and almost none of them are actually actionable",
+  "transform": "watermark",
+  "target_label": "dog",
+  "target_prob": 0.99,
+  "target_met": true,
+  "candidates_scored": 2051,
+  "stage1_evaluated": 1620,
+  "stage1_crossings": 136,
+  "stage2_evaluated": 426,
+  "baseline": [
+    {
+      "image": "forest",
+      "pred": "other",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.0,
+        "other": 1.0
+      }
+    },
+    {
+      "image": "ocean",
+      "pred": "other",
+      "probs": {
+        "cat": 5e-06,
+        "dog": 7e-06,
+        "other": 0.999988
+      }
+    },
+    {
+      "image": "rav4",
+      "pred": "other",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.0,
+        "other": 1.0
+      }
+    },
+    {
+      "image": "woman",
+      "pred": "other",
+      "probs": {
+        "cat": 0.0,
+        "dog": 1e-06,
+        "other": 0.999999
+      }
+    },
+    {
+      "image": "man",
+      "pred": "other",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.0,
+        "other": 1.0
+      }
+    }
+  ],
+  "best": {
+    "transform": "watermark",
+    "image": "woman",
+    "params": {
+      "font": "Courier New.ttf",
+      "font_size": 10,
+      "spacing": 20,
+      "opacity": 0.85,
+      "color": "white",
+      "angle": 70
+    },
+    "pred": "dog",
+    "probs": {
+      "cat": 0.0,
+      "dog": 0.999999,
+      "other": 1e-06
+    },
+    "logit_margin_vs_other": 14.3772
+  },
+  "per_image_best": {
+    "woman": {
+      "transform": "watermark",
+      "image": "woman",
+      "params": {
+        "font": "Courier New.ttf",
+        "font_size": 10,
+        "spacing": 20,
+        "opacity": 0.85,
+        "color": "white",
+        "angle": 70
+      },
+      "pred": "dog",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.999999,
+        "other": 1e-06
+      },
+      "logit_margin_vs_other": 14.3772
+    },
+    "forest": {
+      "transform": "watermark",
+      "image": "forest",
+      "params": {
+        "font": "Arial.ttf",
+        "font_size": 14,
+        "spacing": 16,
+        "opacity": 0.85,
+        "color": "white",
+        "angle": 0
+      },
+      "pred": "dog",
+      "probs": {
+        "cat": 0.009777,
+        "dog": 0.987697,
+        "other": 0.002525
+      },
+      "logit_margin_vs_other": 5.9691
+    },
+    "man": {
+      "transform": "watermark",
+      "image": "man",
+      "params": {
+        "font": "Copperplate.ttc",
+        "font_size": 14,
+        "spacing": 20,
+        "opacity": 0.6,
+        "color": "white",
+        "angle": 60
+      },
+      "pred": "dog",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.995594,
+        "other": 0.004406
+      },
+      "logit_margin_vs_other": 5.4204
+    },
+    "ocean": {
+      "transform": "watermark",
+      "image": "ocean",
+      "params": {
+        "font": "Arial.ttf",
+        "font_size": 20,
+        "spacing": 20,
+        "opacity": 0.85,
+        "color": "black",
+        "angle": 0
+      },
+      "pred": "dog",
+      "probs": {
+        "cat": 0.039124,
+        "dog": 0.949736,
+        "other": 0.01114
+      },
+      "logit_margin_vs_other": 4.4457
+    },
+    "rav4": {
+      "transform": "watermark",
+      "image": "rav4",
+      "params": {
+        "font": "Copperplate.ttc",
+        "font_size": 18,
+        "spacing": 20,
+        "opacity": 0.95,
+        "color": "black",
+        "angle": 60
+      },
+      "pred": "other",
+      "probs": {
+        "cat": 0.005682,
+        "dog": 0.116426,
+        "other": 0.877891
+      },
+      "logit_margin_vs_other": -2.0203
+    }
+  },
+  "images_reaching_target": 2,
+  "images_total": 5,
+  "top": [
+    {
+      "transform": "watermark",
+      "image": "woman",
+      "params": {
+        "font": "Courier New.ttf",
+        "font_size": 10,
+        "spacing": 20,
+        "opacity": 0.85,
+        "color": "white",
+        "angle": 70
+      },
+      "pred": "dog",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.999999,
+        "other": 1e-06
+      },
+      "logit_margin_vs_other": 14.3772
+    },
+    {
+      "transform": "watermark",
+      "image": "woman",
+      "params": {
+        "font": "Courier New.ttf",
+        "font_size": 10,
+        "spacing": 20,
+        "opacity": 0.95,
+        "color": "white",
+        "angle": 60
+      },
+      "pred": "dog",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.999999,
+        "other": 1e-06
+      },
+      "logit_margin_vs_other": 13.9265
+    },
+    {
+      "transform": "watermark",
+      "image": "woman",
+      "params": {
+        "font": "Arial.ttf",
+        "font_size": 10,
+        "spacing": 20,
+        "opacity": 0.75,
+        "color": "white",
+        "angle": 60
+      },
+      "pred": "dog",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.999998,
+        "other": 2e-06
+      },
+      "logit_margin_vs_other": 13.4058
+    },
+    {
+      "transform": "watermark",
+      "image": "woman",
+      "params": {
+        "font": "Arial.ttf",
+        "font_size": 10,
+        "spacing": 20,
+        "opacity": 0.85,
+        "color": "white",
+        "angle": 75
+      },
+      "pred": "dog",
+      "probs": {
+        "cat": 1.4e-05,
+        "dog": 0.999984,
+        "other": 2e-06
+      },
+      "logit_margin_vs_other": 13.3215
+    },
+    {
+      "transform": "watermark",
+      "image": "woman",
+      "params": {
+        "font": "Arial.ttf",
+        "font_size": 10,
+        "spacing": 20,
+        "opacity": 0.8,
+        "color": "white",
+        "angle": 60
+      },
+      "pred": "dog",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.999998,
+        "other": 2e-06
+      },
+      "logit_margin_vs_other": 13.3123
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+"""Tests for the autosearch pipeline.
+
+Deliberately fast: no full searches, just the invariants that would silently break the pipeline.
+Run with `pytest tests/test_autosearch.py`.
+"""
+
+import json
+from pathlib import Path
+
+import pytest
+from PIL import Image
+
+from autosearch.scoring import Scorer
+from autosearch.search import Search, _expand_grid, _is_valid, _neighbors
+from autosearch.transforms import CANVAS, REGISTRY, apply_transform
+
+HOMEWORK = Path(__file__).resolve().parent.parent
+IMAGES = sorted(p for p in (HOMEWORK / "images").glob("*") if p.is_file())
+
+
+@pytest.fixture(scope="module")
+def sources():
+    assert IMAGES, f"no base images found in {HOMEWORK / 'images'}"
+    return [Image.open(p).convert("RGB") for p in IMAGES]
+
+
+@pytest.fixture(scope="module")
+def scorer():
+    return Scorer()
+
+
+@pytest.fixture(scope="module")
+def config():
+    return json.loads((HOMEWORK / "autosearch" / "config.json").read_text())
+
+
+# --- transforms -------------------------------------------------------------
+
+@pytest.mark.parametrize("name,params", [
+    ("collage", {"grid": 10, "line_width": 8, "line_color": "black", "seed": 0}),
+    ("watermark", {"font_size": 12, "spacing": 20, "opacity": 0.6, "angle": 30}),
+    ("degrade", {"kind": "gaussian", "strength": 40, "seed": 0}),
+    ("degrade", {"kind": "uniform_blend", "strength": 0.5, "seed": 0}),
+    ("degrade", {"kind": "salt_pepper", "strength": 0.2, "seed": 0}),
+])
+def test_transforms_produce_valid_images(sources, name, params):
+    img = apply_transform(name, sources, params)
+    assert img.size == (CANVAS, CANVAS)
+    assert img.mode == "RGB"
+
+
+def test_transforms_are_deterministic(sources):
+    """Same params + same seed must reproduce byte-identical output, or reported
+    scores can't be verified by anyone re-running the pipeline."""
+    p = {"grid": 10, "line_width": 8, "line_color": "black", "seed": 7}
+    a = apply_transform("collage", sources, p)
+    b = apply_transform("collage", sources, p)
+    assert a.tobytes() == b.tobytes()
+
+
+def test_collage_seed_changes_output(sources):
+    base = {"grid": 10, "line_width": 8, "line_color": "black"}
+    a = apply_transform("collage", sources, {**base, "seed": 1})
+    b = apply_transform("collage", sources, {**base, "seed": 2})
+    assert a.tobytes() != b.tobytes()
+
+
+def test_unknown_transform_raises(sources):
+    with pytest.raises(ValueError, match="unknown transform"):
+        apply_transform("nope", sources, {})
+
+
+# --- scoring ----------------------------------------------------------------
+
+def test_baseline_images_are_other(scorer, sources):
+    """The provided base images must classify as 'other' -- if this fails, any
+    'false positive' we report downstream is meaningless."""
+    for path, s in zip(IMAGES, scorer.score_batch(sources)):
+        assert s.pred == "other", f"{path.name} predicted {s.pred}"
+
+
+def test_probs_sum_to_one(scorer, sources):
+    for s in scorer.score_batch(sources[:2]):
+        assert abs(sum(s.probs.values()) - 1.0) < 1e-5
+
+
+def test_batching_matches_single(scorer, sources):
+    """Batched scoring must agree with one-at-a-time, or the whole search is
+    measuring something different from the provided test harness."""
+    batch = scorer.score_batch(sources[:3])
+    for img, b in zip(sources[:3], batch):
+        single = scorer.score(img)
+        assert abs(single.probs["dog"] - b.probs["dog"]) < 1e-5
+
+
+def test_margin_matches_logit_difference(scorer, sources):
+    s = scorer.score(sources[0])
+    assert abs(s.margin("dog") - (s.logits["dog"] - s.logits["other"])) < 1e-9
+
+
+# --- search machinery -------------------------------------------------------
+
+def test_expand_grid_skips_underscore_keys():
+    grid = _expand_grid({"a": [1, 2], "b": ["x"], "_comment": "ignored"})
+    assert len(grid) == 2
+    assert all("_comment" not in g for g in grid)
+
+
+@pytest.mark.parametrize("params,expected", [
+    ({"kind": "gaussian", "strength": 40}, True),
+    ({"kind": "gaussian", "strength": 0.5}, False),
+    ({"kind": "salt_pepper", "strength": 0.5}, True),
+    ({"kind": "salt_pepper", "strength": 40}, False),
+])
+def test_degrade_validity_filter(params, expected):
+    assert _is_valid("degrade", params) is expected
+
+
+def test_collage_rejects_gutters_wider_than_tile():
+    assert _is_valid("collage", {"grid": 32, "line_width": 12}) is False
+    assert _is_valid("collage", {"grid": 10, "line_width": 8}) is True
+
+
+def test_neighbors_stay_positive_and_valid():
+    cfg = {"numeric_deltas": {"grid": [-20, 2]}, "seeds": 3}
+    out = _neighbors({"grid": 10, "line_width": 4, "seed": 0}, cfg, "collage")
+    assert all(p["grid"] > 0 for p in out)
+    assert sum(1 for p in out if p["seed"] != 0) == 3
+
+
+# --- config integrity -------------------------------------------------------
+
+def test_config_blocks_are_wellformed(config):
+    for uf in ("uf1", "uf2", "uf3"):
+        block = config[uf]
+        assert block["transform"] in REGISTRY
+        assert block["coarse"], f"{uf} has an empty coarse grid"
+        assert "complaint" in block, f"{uf} must record the user complaint it targets"
+
+
+def test_config_coarse_params_are_accepted_by_their_transform(sources, config):
+    """Every coarse grid must produce a renderable image -- catches config typos
+    before they waste a full search run."""
+    for uf in ("uf1", "uf2", "uf3"):
+        block = config[uf]
+        valid = [p for p in _expand_grid(block["coarse"]) if _is_valid(block["transform"], p)]
+        assert valid, f"{uf}: every coarse combination was filtered out as invalid"
+        apply_transform(block["transform"], sources, valid[0])
+
+
+# --- end to end -------------------------------------------------------------
+
+def test_search_finds_a_false_positive(scorer, tmp_path):
+    """A minimal end-to-end run on the complaint with the smallest search space."""
+    search = Search(scorer=scorer, verbose=False)
+    search.config["uf3"]["coarse"] = {"kind": ["gaussian"], "strength": [60, 120], "seed": [0]}
+    search.config["uf3"]["refine"] = {"numeric_deltas": {"strength": [20]}, "seeds": 2}
+    report = search.run("uf3", [HOMEWORK / "images" / "woman.jpg"], out_dir=tmp_path)
+
+    assert report["best"]["pred"] == "dog"
+    assert report["best"]["probs"]["dog"] > 0.5
+    assert all(b["pred"] == "other" for b in report["baseline"])
+    assert list(tmp_path.glob("*.png")), "no output image written"
+    assert list(tmp_path.glob("*__ORIGINAL.png")), "original not saved alongside"

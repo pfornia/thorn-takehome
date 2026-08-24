@@ -1,11 +1,79 @@
-# AI Tool Usage Log — Thorn Take-Home
+# AI Tool Usage — factual record
 
-Running log of what Claude Code helped with, kept as work happens so the disclosure section of
-the write-up is accurate rather than reconstructed from memory at the end. Per the prompt's rule,
-this covers code/technical assistance only — the written explanation's reasoning is Paul's own.
+> **⚠️ This is raw material, not the submission text.** The assignment requires the write-up to be
+> in Paul's own words, and requires disclosing which tools were used, for what, and how their
+> output was verified or modified. This file is the factual log to write that disclosure *from*.
+> Paul should rewrite it in his own voice; do not paste it verbatim.
 
-Format per entry: date, what was asked, what Claude produced, how Paul verified/modified it.
+**Tool used:** Claude Code (Anthropic), Claude Sonnet, run locally in the terminal.
 
----
+## What the AI did
 
-(nothing logged yet — materials not received)
+**Code.** Wrote all the experiment scripts (`homework/exp_*.py`) and the automated search package
+(`homework/autosearch/`), including the transformation library, batched scoring wrapper, two-stage
+search engine, CLI, config schema, and tests. Ran them and reported the numbers.
+
+**Environment.** Set up the `uv` virtual environment; extracted and organised the assignment zip.
+
+**Experiment execution and record-keeping.** Ran every sweep, tabulated results, and maintained
+`experiment-log.md` continuously, including negative results and corrections.
+
+**Analysis proposals.** Suggested hypotheses to test and interpreted results. Several were wrong
+and were corrected by evidence (below).
+
+## What Paul directed
+
+The investigation was driven by Paul's questions and design decisions, not autonomously by the AI:
+
+- Rendering plain words as images to test for OCR sensitivity (→ E001, killed the idea of
+  optimising watermark wording)
+- Testing ASCII art and a dog-shaped photomosaic as shape probes (→ E002)
+- **The key insight:** challenging the AI's claim that a blank white image was a promising building
+  block, correctly identifying it as the model's *prior* and therefore an asymptote rather than a
+  stepping stone. This reframed the entire search and led directly to the high-frequency-texture
+  finding (→ E003)
+- Comparing an N×N collage against its own sub-tiles, to separate spatial frequency from content
+  (→ E006)
+- Rejecting the fine 32×32 collage as visually implausible and requiring a realistic tile count
+  (→ E009)
+- Rejecting watermark spacing 10–14 as unrealistically dense and requiring spacing ≥ 20 (→ E011)
+- Observing that seed variance could be searched to reach the 99% tier (→ E010 best-seed recovery)
+- Requiring that source diversity be tested against single-source collages (→ E010)
+
+## AI claims that turned out to be wrong, and how they were caught
+
+Recorded because they show what was verified rather than accepted:
+
+| AI claim | How it failed | Where |
+|---|---|---|
+| `forest.jpg` will be closest to `dog` because foliage looks fur-like | It was the *farthest* of all five base images | E000 |
+| Destroying image content is the promising direction | Blur/crop/downscale only ever reach the prior; they cannot cross | corrected in E003 |
+| Tiling raises spatial frequency and cropping lowers it, so their effects should have opposite signs | Measured as deltas, *all* conditions looked positive; the deltas were misleading because baselines differ. Only absolute comparison against the prior separates them | E006 |
+| Shape-matched mosaic comparison shows shape "actively hurts" by 12 logits | Confounded: the dog-shaped variant also darkened 75% of tiles. Flagged as not safe to claim without a brightness-matched control | E002 |
+| The deliverable clearly requires one image per user complaint | Overconfident reading of ambiguous wording; Paul pushed back and the ambiguity was documented and sidestepped instead | scope decisions |
+| Artem Shnayder is a verified contact (unrelated task, same session) | Sourced from data brokers, not a page that resolves; could not be found | — |
+
+## Verification performed
+
+- Every reported score comes from running the provided `model.py` and `model.pt` unmodified. No
+  number in the log is estimated or predicted.
+- Batched scoring is unit-tested against one-at-a-time scoring to confirm they agree
+  (`tests/test_autosearch.py::test_batching_matches_single`).
+- Transformations are unit-tested for determinism, so any reported result can be reproduced from
+  its recorded parameters and seed.
+- The provided test suite (`tests/test_false_positives.py`) is the authority on whether a candidate
+  passes; the search's own scoring was checked to agree with it.
+- Base images were re-verified as `other` before every search run, so a "false positive" is always
+  measured against a confirmed-clean starting point.
+
+## Note on the automated search and the adversarial constraint
+
+The pipeline searches **transformation parameters** (grid size, gutter width, font size, rotation,
+noise sigma, random seed), never pixel values. Pixel-level hill-climbing would be an adversarial
+perturbation, which the assignment forbids, and this distinction was made explicit in the design
+before the search was built (see `strategy.md` and `autosearch/README.md`). The model is queried
+only as a black box for a score; its weights are never touched and no gradients are used.
+
+**Seed search disclosure:** where a result comes from selecting the best of N random seeds, the
+write-up should say so and report the distribution, not just the maximum. For the UF1 collage:
+30/30 seeds cross 0.50, mean 0.93, and 3/30 exceed 0.99.

@@ -1,0 +1,69 @@
+{
+  "_comment": "Search space per user complaint. 'coarse' is a full grid (cartesian product). 'refine' describes how to explore locally around the best coarse result: numeric params step by +/- the listed deltas, 'seeds' draws N fresh random seeds. Ranges are informed by the manual investigation in experiment-log.md; see the notes on each block.",
+
+  "target_label": "dog",
+  "target_prob": 0.99,
+
+  "uf1": {
+    "name": "UF1 - grid / collage with lines running through",
+    "complaint": "I'm seeing a lot of bad predictions where the image is sort of like a grid or collage and they seem to have lots of lines running through them",
+    "transform": "collage",
+    "per_image": false,
+    "_notes": "grid<8 never crosses; usable window is roughly 10-32. line_width=0 is retained deliberately as a control - it should never cross, which demonstrates the gutters are the trigger. Colour preference inverts with density (black favours coarse grids, white favours fine).",
+    "coarse": {
+      "grid": [8, 10, 12, 16, 24, 32],
+      "line_width": [0, 2, 4, 8, 12],
+      "line_color": ["black", "white"],
+      "source_mode": ["mixed"],
+      "seed": [0, 1, 2]
+    },
+    "refine": {
+      "numeric_deltas": { "grid": [-2, -1, 1, 2], "line_width": [-3, -2, -1, 1, 2, 3] },
+      "seeds": 40
+    }
+  },
+
+  "uf2": {
+    "name": "UF2 - watermarks and text",
+    "complaint": "A bunch of the images in my review queue have watermarks and text in them and almost none of them are actually actionable",
+    "transform": "watermark",
+    "per_image": true,
+    "_notes": "Text content is NOT searched: the model has no OCR capability, and the word 'Dog' scored worse than 'Tree' or gibberish. Font size and tiling density dominate; opacity is weak and non-monotonic; rotation angle is unexpectedly strong. spacing>=20 keeps the watermark visually plausible - denser looks artificial.",
+    "_size_note": "Kept deliberately small so stage 1 stays quick; stage 2 does the precision work. Font FAMILY was measured to matter far less than size/angle, so only three faces with distinct stroke weights are sampled rather than a dozen.",
+    "coarse": {
+      "font": ["Arial.ttf", "Courier New.ttf", "Copperplate.ttc"],
+      "font_size": [10, 14, 18],
+      "spacing": [20, 32],
+      "opacity": [0.4, 0.6, 0.85],
+      "color": ["white", "black"],
+      "angle": [0, 30, 60]
+    },
+    "refine": {
+      "numeric_deltas": {
+        "font_size": [-2, -1, 1, 2],
+        "spacing": [-4, -2, 2, 4],
+        "opacity": [-0.1, -0.05, 0.05, 0.1],
+        "angle": [-15, -10, -5, 5, 10, 15]
+      },
+      "seeds": 0
+    }
+  },
+
+  "uf3": {
+    "name": "UF3 - messy, hard to make out, low quality",
+    "complaint": "The model is flagging lots of messy looking images that are hard to make out and sort of low quality. The predictions are basically never right on these",
+    "transform": "degrade",
+    "per_image": true,
+    "_notes": "salt_pepper is retained deliberately as a control - it never crossed at any density in manual testing, and that failure is what isolates SMOOTH fine-grained variation as the trigger rather than disruption in general. Prefer the lowest strength that clears the target: a lightly grainy photo is far more plausible as real user content than one destroyed by noise.",
+    "coarse": {
+      "kind": ["gaussian", "uniform_blend", "salt_pepper"],
+      "strength": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 20, 40, 60, 80, 120, 160],
+      "seed": [0, 1]
+    },
+    "refine": {
+      "numeric_deltas": { "strength": [-20, -10, -5, 5, 10, 20] },
+      "seeds": 20
+    },
+    "_strength_note": "Values <=1.0 apply to uniform_blend (alpha) and salt_pepper (density); values >1 apply to gaussian (sigma). Combinations outside a kind's sensible range are skipped automatically by the search."
+  }
+}

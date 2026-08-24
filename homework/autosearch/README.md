@@ -1,0 +1,123 @@
+# autosearch — automated false-positive discovery
+
+Formalises the manual investigation (see `../../experiment-log.md`) into a repeatable pipeline.
+
+**Input:** a user complaint (`uf1` / `uf2` / `uf3`) and a list of base images.
+**Output:** a transformed image the classifier labels `dog` with probability ≥ target (default
+0.99), plus the original for comparison and a JSON report with before/after scores.
+
+## Usage
+
+```bash
+# one complaint
+python -m autosearch --uf uf1 --images images/*.jpg --out results/
+
+# all three
+python -m autosearch --uf all --images images/*.jpg images/*.jpeg --out results/
+
+# useful flags
+--target 0.95      # override the target probability
+--top-k 8          # refine around more coarse results
+--batch-size 128   # larger batches if you have the memory
+--device cpu       # force CPU (default: MPS when available)
+```
+
+Exit code is 0 only if every requested complaint met its target, so it drops straight into CI.
+
+## How the search works
+
+Two stages, by design:
+
+**Stage 1 — coarse grid.** Full cartesian product over the ranges in `config.json`. Produces
+readable structure: which parameters matter, and roughly where the interesting region is.
+
+**Stage 2 — local refinement.** Takes the top-K stage-1 results and explores around each: numeric
+parameters step by the configured deltas, and (where the transform is stochastic) N fresh random
+seeds are drawn. This is where the last few points of confidence come from.
+
+Neither stage alone is sufficient:
+
+- A single fine grid is combinatorially infeasible — the collage space is effectively unbounded
+  once crop regions are continuous.
+- Pure random search finds *a* winner but yields no dose-response structure, and the investigation
+  has to explain *which characteristics* trigger the failure, not just produce one broken image.
+
+### This is parameter search, not an adversarial attack
+
+The assignment forbids adversarial perturbations. The distinction this pipeline respects:
+
+- **Forbidden:** optimising *pixel values* against the model (gradient attacks, and equally
+  black-box pixel hill-climbing like NES/SPSA/square attack).
+- **What this does:** optimising *transformation parameters* — grid size, gutter width, font size,
+  rotation, noise sigma, random seed. Every candidate is a plausible image edit a real user or
+  pipeline could produce. The model is only ever queried as a black box for a score; its weights
+  are never touched and no gradient is used.
+
+## Configuration
+
+`config.json` holds one block per complaint. To widen the search, edit the `coarse` ranges; to
+change how tightly stage 2 explores, edit `refine`.
+
+```jsonc
+"uf1": {
+  "transform": "collage",
+  "per_image": false,          // false = one run drawing tiles from ALL images
+  "coarse":  { "grid": [...], "line_width": [...], ... },
+  "refine":  { "numeric_deltas": { "grid": [-2,-1,1,2] }, "seeds": 40 }
+}
+```
+
+`per_image: true` runs the search separately for each input image (UF2, UF3). `false` treats the
+image list as one source pool (UF1's mixed collage).
+
+Invalid combinations are filtered before rendering — e.g. gaussian `strength` is a sigma (>1)
+while blend/salt-pepper `strength` is a 0–1 fraction, so most cross-products are skipped rather
+than wasting a forward pass.
+
+## Why the ranges are what they are
+
+The defaults encode findings from the manual investigation rather than being guesses:
+
+| Complaint | Encoded finding |
+|---|---|
+| UF1 | Grids below 8 never cross; the usable window is ~10–32. Gutters are **required** — `line_width: 0` is kept in the space deliberately as a control that should never cross. Line colour preference inverts with density (black favours coarse grids, white favours fine). Mixed sources beat any single source. |
+| UF2 | Text *content* is not searched at all — the model has no OCR ability (the word "Dog" scored worse than "Tree" and worse than gibberish). Glyph size and tiling density dominate; opacity is weak and non-monotonic; rotation angle is unexpectedly strong. `spacing ≥ 20` keeps the watermark visually plausible. |
+| UF3 | Additive gaussian noise crosses on every base image and is monotonic in strength. `salt_pepper` is kept in the space as a **documented control** — it never crossed at any density, and that failure is what isolates *smooth* fine-grained variation as the trigger rather than disruption in general. |
+
+## Objective function
+
+The search maximises the **logit margin** `logit(dog) − logit(other)`, not probability.
+
+Probabilities saturate: four of the five provided base images score `dog = 0.000000`, which makes
+them indistinguishable and gives the search nothing to climb. In logit space those same images
+spread across a ~13-point range. Two reference points on this checkpoint: the model's no-evidence
+prior sits near **−2.5**, and **0.0** is a coin flip. A candidate that improves on its own baseline
+but lands at −2.5 has merely had its information removed; only crossing *above* the prior is
+evidence of positive dog signal.
+
+## Reporting
+
+`results/report.json` records, per complaint: the baseline scores of the unmodified images, how
+many candidates were evaluated at each stage, how many crossed, the best result with its full
+parameter set, and the top-K.
+
+**On reporting a seed-searched result honestly:** when the best candidate comes from searching N
+random seeds, say so and give the distribution, not just the maximum. "Crosses on 30/30 seeds,
+mean 0.93, and reaches 0.999 on the best of 30" is both more honest and a stronger claim than a
+bare 0.999.
+
+## Files
+
+| file | role |
+|---|---|
+| `config.json` | search space per complaint |
+| `transforms.py` | transformation library (`collage`, `watermark`, `degrade`) |
+| `scoring.py` | batched model scoring; returns full probability vectors |
+| `search.py` | two-stage search engine |
+| `__main__.py` | CLI |
+
+## Extending
+
+Add a transform to `REGISTRY` in `transforms.py` with the signature
+`fn(sources: list[Image], params: dict) -> Image`, then add a config block naming it. No changes to
+the search engine are required.

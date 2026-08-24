@@ -31,9 +31,16 @@ are deliberately `other` — so aiming it at the parent directory fails by desig
 
 | folder | contents |
 |---|---|
-| `false_positives/` | the three deliverables. Point `FALSE_POSITIVE_DIR` here. |
+| `false_positives/` | the **primary** deliverables, three `dog` false positives. Point `FALSE_POSITIVE_DIR` here. |
+| `false_positives_cat/` | the same three complaints re-targeted at `cat`. Secondary; see the caveat below. |
 | `originals/` | the unmodified base images they were made from |
 | `controls/` | images that deliberately do **not** cross, included as evidence for the mechanism |
+
+The two false-positive sets are kept in **separate directories on purpose.** Thorn's test asserts a
+threshold against *every* file in `FALSE_POSITIVE_DIR`, so a single sub-threshold image fails the
+whole run. The cat set does not clear 99% on all three complaints (below), so mixing the six images
+into one directory would turn a clean pass into a failure and obscure the fact that the dog set
+clears the hard tier outright.
 
 ## The three false positives
 
@@ -57,6 +64,73 @@ All three clear the provided suite's hard (99%) threshold.
 UF1 has no single "original" — it is composed from crops of all five provided images. Its paired
 before-image is the **no-gutter control** below, which is the more meaningful comparison anyway:
 identical tiles, identical arrangement, only the gutters differ.
+
+## The `cat` set — same three complaints, different target class
+
+`HOMEWORK.md`'s task sentence permits false positives for "`dog` **or** `cat`", so the search was
+re-run with `--target-label cat`. Different base images were chosen from the dog set deliberately,
+to show the effect is not a property of one photograph.
+
+| user complaint | image | pred | cat | dog | other | cat margin |
+|---|---|---|---|---|---|---|
+| — | `UF2_watermark_ORIGINAL_forest.jpg` (unmodified) | `other` | 0.000000 | 0.000000 | 1.000000 | −26.48 |
+| — | `UF3_noise_ORIGINAL_ocean.jpg` (unmodified) | `other` | 0.000005 | 0.000007 | 0.999988 | −12.14 |
+| **UF1** grid/collage | `UF1_collage_MODIFIED_cat0.9881.png` | **`cat`** | 0.9881 🟡 | 0.0084 | 0.0034 | **+4.76** |
+| **UF2** watermark/text | `UF2_watermark_MODIFIED_cat0.9963.png` | **`cat`** | **0.9963** ✅ | 0.0009 | 0.0029 | **+5.84** |
+| **UF3** messy/low quality | `UF3_noise_MODIFIED_cat0.8821.png` | **`cat`** | 0.8821 🟡 | 0.1112 | 0.0067 | **+2.07** |
+
+The `cat margin` column is `logit(cat) − max(logit of every other class)`, i.e. margin against the
+strongest *competitor*, which is positive if and only if `cat` is actually the prediction. This is a
+stricter quantity than the `logit margin` column in the dog table above, which measures against
+`other` specifically. For the dog images the two coincide, because `other` is the runner-up in every
+case; for the cat images they do not — on UF3 the runner-up is `dog` at 0.1112, so measuring against
+`other` would report a flattering +4.88 instead of +2.07. See E014 in `experiment-log.md`, where
+exactly this distinction turned out to be a live bug rather than a presentational nicety.
+
+```bash
+cd homework
+FALSE_POSITIVE_DIR=../deliverables/false_positives_cat uv run --project .. pytest tests/test_false_positives.py
+# 3 passed, 1 failed  — clears easy (10%) and medium (50%); UF1 misses hard (99%) by 0.0019
+```
+
+**All three are genuine false positives** — the model predicts `cat` on an image containing no
+animal — and all three clear the easy and medium tiers. Only UF2 clears the hard 99% tier.
+
+### Transformations (cat)
+
+| | base image | transformation |
+|---|---|---|
+| UF1 | all five (mixed) | 26×26 collage of random square crops, 4px **white** gutters, seed 93 |
+| UF2 | `forest.jpg` | tiled watermark, Copperplate 18pt, spacing 18, opacity 0.6, white, **0°** |
+| UF3 | `ocean.jpg` | additive gaussian noise, **σ=80** |
+
+### Why cat is harder — and why that is the most useful result here
+
+Dog clears the hard tier on all three complaints; cat clears it on one, using the same images,
+transformations, and a *larger* search budget. That asymmetry is the cleanest single piece of
+evidence for the frozen-backbone explanation: **ImageNet-1k contains roughly 120 dog-breed classes
+but only about 7 cat classes**, so the frozen feature extractor carries far more fine-grained
+dog-texture machinery. Generic high-frequency texture has a much shorter path to `dog` than to `cat`.
+The asymmetry is visible in the very first baseline (dog > cat on all five untouched images) and
+holds all the way through the automated search.
+
+Two parameter-level findings point the same way:
+
+- **Optimal rotation flips with the target class.** Dog+UF2 peaks at 60–75°, with 0° among the
+  worst; cat+UF2 peaks at **0°**. Same transformation family, opposite preference.
+- **Optimal collage density flips too.** Dog+UF1 peaks at grid 8–10 with black gutters; cat+UF1
+  peaks at grid **26** with white gutters, and collapses to 0.45 at grid 27.
+
+These read as two distinct frequency signatures in the frozen feature space, not one shared
+"animal texture" direction that both classes ride.
+
+### Note on the σ cap
+
+Gaussian σ is capped at 100 across the search (`config.json`, `uf3.refine.numeric_max`). Above
+roughly that, the subject stops being recognisable, which breaks the premise of the complaint —
+UF3 describes messy low-quality user photos, not images destroyed beyond recognition. The cap has a
+real cost for cat: an earlier uncapped run reached cat 0.9771 at σ=160 on `rav4`. That image is not
+plausible user content, so the capped 0.8821 is the honest number.
 
 ## Controls — the evidence for *why*
 

@@ -81,3 +81,28 @@ only as a black box for a score; its weights are never touched and no gradients 
 **Seed search disclosure:** where a result comes from selecting the best of N random seeds, the
 write-up should say so and report the distribution, not just the maximum. For the UF1 collage:
 30/30 seeds cross 0.50, mean 0.93, and 3/30 exceed 0.99.
+
+## Addendum — the `cat` deliverable set (2026-08-24)
+
+Claude re-ran the automated search against `cat` and assembled
+`deliverables/false_positives_cat/`. Two code changes were needed and are worth disclosing because
+both alter what the search is allowed to do:
+
+- **`numeric_max` in the refine block.** A ceiling on gaussian σ, set at 100 on Paul's instruction
+  that beyond that the subject stops being recognisable and the image no longer resembles the
+  low-quality user content UF3 describes. Without a ceiling in *refinement* the cap leaks, since the
+  coarse best lands on the top grid value and any positive delta steps past it. Unit-tested
+  (`test_neighbors_respect_numeric_max`, `test_uf3_sigma_is_capped_in_both_stages`).
+- **Coarse σ grid truncated** from a maximum of 160 to 100, so E014's σ=120–180 results are no
+  longer reproducible from the committed config. Recorded in `config.json` rather than dropped
+  silently.
+
+**Seed search disclosure for the cat set**, same standard as the dog set above: UF1 cat is the best
+of roughly 1,700 collage seeds, and the distribution at the winning parameters (grid 26 / 4px /
+white, 400 seeds) spans about 0.1 to 0.9881. UF3 cat is the best of 120 seeds per strength value.
+Neither is a typical draw and the write-up should say so.
+
+**One negative result Claude surfaced that is worth keeping honest:** `uniform_blend` at α=0.7
+reached cat 0.9359, beating every capped-gaussian result, and was rejected because 70% pure noise is
+*less* recognisable than σ=100. The cap as literally specified (σ only) did not enforce the property
+it was meant to enforce. Verified by eye, not by metric.

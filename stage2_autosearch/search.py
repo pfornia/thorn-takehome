@@ -91,6 +91,11 @@ def _is_valid(transform: str, params: dict) -> bool:
 def _neighbors(params: dict, refine_cfg: dict, transform: str) -> list[dict]:
     """Local neighbourhood of a parameter set: numeric steps plus extra seeds."""
     out: list[dict] = []
+    # Upper bounds on individual parameters. Without these, refinement walks a parameter past
+    # the ceiling the coarse grid deliberately set: whenever the coarse best lands on the top
+    # grid value, a positive delta steps outside the intended range. Used to keep candidates
+    # visually plausible as real user content -- see the note on uf3.strength in config.json.
+    caps = refine_cfg.get("numeric_max", {})
     for key, deltas in refine_cfg.get("numeric_deltas", {}).items():
         if key not in params:
             continue
@@ -106,6 +111,8 @@ def _neighbors(params: dict, refine_cfg: dict, transform: str) -> list[dict]:
                 val = round(float(val), 4)
                 if val <= 0:
                     continue
+            if key in caps and val > caps[key]:
+                continue
             cand[key] = val
             if _is_valid(transform, cand):
                 out.append(cand)

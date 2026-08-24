@@ -59,10 +59,17 @@ UF3_noise_MODIFIED_dog1.000.png         dog      0.000169   0.998596   0.001235
 cd homework
 FALSE_POSITIVE_DIR=../deliverables/false_positives uv run --project .. pytest tests/test_false_positives.py
 # 4 passed  (includes the hard 99% threshold)
+
+FALSE_POSITIVE_DIR=../deliverables/false_positives_cat uv run --project .. pytest tests/test_false_positives.py
+# 3 passed, 1 failed  (clears easy and medium; UF1 misses the hard tier by 0.0019)
 ```
 
-Point it at `false_positives/`, not at `deliverables/` — the latter also holds the originals and
-the controls, which are deliberately `other`.
+Point it at one of the two `false_positives*` directories, not at `deliverables/` — the latter also
+holds the originals and the controls, which are deliberately `other`.
+
+The dog and cat sets are **separate directories on purpose**: the test asserts its threshold against
+every file in the directory, so combining them would fail the run on the cat set's sub-threshold
+images and hide the fact that the dog set clears 99% outright.
 
 ## What was found
 
@@ -105,6 +112,23 @@ no animal:
 | UF1 "grid or collage … lots of lines running through them" | 10×10 mixed-source collage, 8px black gutters | 0.9992 |
 | UF2 "watermarks and text" | tiled watermark, Arial 10pt, spacing 20 | 0.9998 |
 | UF3 "messy … hard to make out … low quality" | additive gaussian noise, σ=60 | ~1.000 |
+
+`HOMEWORK.md` permits `dog` **or** `cat`, so the search was also re-run against `cat`, on different
+base images (`deliverables/false_positives_cat/`):
+
+| complaint | transformation | `cat` |
+|---|---|---|
+| UF1 | 26×26 mixed-source collage, 4px white gutters | 0.9881 |
+| UF2 | `forest.jpg`, Copperplate 18pt, spacing 18, 0° | 0.9963 |
+| UF3 | `ocean.jpg`, additive gaussian noise, σ=80 | 0.8821 |
+
+**Cat is measurably harder than dog**, and that asymmetry is the single best piece of evidence for
+the frozen-backbone explanation. Dog clears the hard 99% tier on all three complaints; cat clears it
+on one, with the same transformations and a larger search budget. ImageNet-1k has ~120 dog-breed
+classes against ~7 cat classes, so the frozen features carry far more fine-grained dog-texture
+machinery and generic high-frequency texture has a much shorter path to `dog`. Two parameter-level
+findings agree: the best rotation angle flips (dog 60–75°, cat 0°) and the best collage density
+flips (dog grid 8–10 black gutters, cat grid 26 white).
 
 Constraint respected throughout: **no adversarial perturbations, and the model is never modified.**
 Every candidate is a plausible image edit; the search only chooses parameters. See

@@ -55,13 +55,15 @@
     "transform": "degrade",
     "per_image": true,
     "_notes": "salt_pepper is retained deliberately as a control - it never crossed at any density in manual testing, and that failure is what isolates SMOOTH fine-grained variation as the trigger rather than disruption in general. Prefer the lowest strength that clears the target: a lightly grainy photo is far more plausible as real user content than one destroyed by noise.",
+    "_sigma_cap_note": "Gaussian sigma is capped at 100 (Paul, 2026-08-24). Above roughly 100 the subject stops being recognisable, which breaks the premise of the complaint: UF3 describes messy low-quality user photos, not images destroyed beyond recognition. The cap is enforced in both stages - the coarse grid stops at 100 and refine carries numeric_max so a positive delta cannot step over it. E014's cat results at sigma 120-180 predate this cap and are no longer reproducible from this config.",
     "coarse": {
       "kind": ["gaussian", "uniform_blend", "salt_pepper"],
-      "strength": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 20, 40, 60, 80, 120, 160],
+      "strength": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 20, 40, 60, 80, 100],
       "seed": [0, 1]
     },
     "refine": {
       "numeric_deltas": { "strength": [-20, -10, -5, 5, 10, 20] },
+      "numeric_max": { "strength": 100 },
       "seeds": 20
     },
     "_strength_note": "Values <=1.0 apply to uniform_blend (alpha) and salt_pepper (density); values >1 apply to gaussian (sigma). Combinations outside a kind's sensible range are skipped automatically by the search."

@@ -128,6 +128,31 @@ def test_neighbors_stay_positive_and_valid():
     assert sum(1 for p in out if p["seed"] != 0) == 3
 
 
+def test_neighbors_respect_numeric_max():
+    """Refinement must not step a parameter over its configured ceiling.
+
+    This is the exact case the cap exists for: the coarse grid tops out at the ceiling, so the
+    best coarse result sits *on* it and every positive delta lands outside the intended range.
+    """
+    cfg = {"numeric_deltas": {"strength": [-10, 5, 20]}, "numeric_max": {"strength": 100},
+           "seeds": 0}
+    out = _neighbors({"kind": "gaussian", "strength": 100, "seed": 0}, cfg, "degrade")
+    assert out, "expected the downward step to survive"
+    assert all(p["strength"] <= 100 for p in out)
+    assert {p["strength"] for p in out} == {90}
+
+
+def test_uf3_sigma_is_capped_in_both_stages(config):
+    """The recognisability cap has to hold in the coarse grid and in refinement.
+
+    Capping only the grid would leak: see test_neighbors_respect_numeric_max.
+    """
+    uf3 = config["uf3"]
+    sigmas = [s for s in uf3["coarse"]["strength"] if s > 1]
+    assert max(sigmas) <= 100
+    assert uf3["refine"]["numeric_max"]["strength"] == 100
+
+
 # --- config integrity -------------------------------------------------------
 
 def test_config_blocks_are_wellformed(config):

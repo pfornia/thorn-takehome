@@ -38,6 +38,21 @@ uv sync                                        # from the repo root
 
 Then restore `model.pt` and `images/` into `homework/` from the assignment zip.
 
+## Scoring an image
+
+```bash
+uv run python classify.py deliverables/false_positives/*.png
+```
+
+```
+file                                    pred          cat        dog      other
+UF1_collage_MODIFIED_dog0.9992.png      dog      0.000364   0.999232   0.000404
+UF2_watermark_MODIFIED_dog0.9998.png    dog      0.000000   0.999761   0.000239
+UF3_noise_MODIFIED_dog1.000.png         dog      0.000169   0.998596   0.001235
+```
+
+`--json` for machine-readable output, `--logits` to add the raw logits.
+
 ## Verifying the deliverables
 
 ```bash

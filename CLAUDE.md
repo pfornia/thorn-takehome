@@ -34,9 +34,9 @@ Extracted from the submitted zip into `homework/`:
 `model.pt` and `homework/images/` (the provided base images) are gitignored — large, provided by
 Thorn, not Paul's own work product, and re-extractable from the original zip if ever needed. Any
 generated/intermediate images from an automated transformation-search pipeline should go in
-`homework/outputs/` (also gitignored) so bulk experimentation doesn't bloat git history. **The
+`outputs/` (also gitignored) so bulk experimentation doesn't bloat git history. **The
 final 2-3 selected deliverable false-positive images should NOT live in `images/` or `outputs/`**
-— put them somewhere else (e.g. `homework/deliverables/`) so they stay tracked as the actual
+— put them somewhere else (e.g. `deliverables/`) so they stay tracked as the actual
 submission artifacts.
 
 ## Context
@@ -94,9 +94,9 @@ rather than retroactively branched.
 ## Status (2026-08-24)
 Investigation complete (E000–E011); all three complaints reproduce above the 99% tier, and the
 three candidates pass Thorn's provided `test_false_positives.py` at the hard threshold. Final
-images are in `homework/deliverables/` (tracked) with `SCORES.md`.
+images are in `deliverables/` (tracked) with `SCORES.md`.
 
-Automated pipeline built: `homework/autosearch/`. Two-stage search (coarse grid → local refine).
+Automated pipeline built: `stage2_autosearch/`. Two-stage search (coarse grid → local refine).
 It has already found configurations the manual sweep missed.
 
 **Remaining: the write-up.** Five sections required, and per the assignment's rule Claude must not
@@ -131,7 +131,7 @@ Corollary: **encode config and score in the filename** (e.g.
 cross-referencing the experiment log.
 
 ## ⚠️ Always save generated test images
-Every experiment script must write its generated images to `homework/outputs/<expNNN>_<name>/`
+Every experiment script must write its generated images to `outputs/<expNNN>_<name>/`
 (gitignored). Needed for visual inspection, for reproducing results, and because the submission
 requires before/after image pairs. Don't score an image without saving it.
 

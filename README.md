@@ -93,7 +93,7 @@ no animal:
 
 Constraint respected throughout: **no adversarial perturbations, and the model is never modified.**
 Every candidate is a plausible image edit; the search only chooses parameters. See
-[`homework/autosearch/README.md`](homework/autosearch/README.md) for where that line is drawn.
+[`stage2_autosearch/README.md`](stage2_autosearch/README.md) for where that line is drawn.
 
 ## Automated pipeline
 

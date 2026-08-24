@@ -180,7 +180,7 @@ def test_invalid_target_label_rejected(scorer):
 
 
 def test_candidate_prob_is_not_hardcoded_to_dog(scorer, sources):
-    from autosearch.search import Candidate
+    from stage2_autosearch.search import Candidate
     c = Candidate("degrade", {}, "x", scorer.score(sources[0]))
     for label in ("cat", "dog", "other"):
         assert c.prob(label) == c.score.probs[label]
@@ -202,7 +202,7 @@ def test_margin_vs_best_other_is_not_gameable(scorer, sources):
     the model called `dog` with near-certainty when the target was `cat`, because
     cat beat 'other' while dog took all the mass. Margin against the strongest
     competitor is positive only when the target class actually wins."""
-    from autosearch.transforms import apply_transform
+    from stage2_autosearch.transforms import apply_transform
     img = apply_transform("degrade", sources, {"kind": "gaussian", "strength": 160, "seed": 0})
     s = scorer.score(img)
     for label in ("cat", "dog", "other"):

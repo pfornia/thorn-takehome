@@ -4,6 +4,12 @@
 > the submission. For the final project write-up, authored by Paul Fornia, see:
 > https://docs.google.com/document/d/1SnItar5idhUFMzAfGKthkYRc5UXC5EN79XLYeoX7yhg
 
+> 📁 **Note on paths.** Entries below reference scripts as `homework/exp_*.py` and
+> `homework/autosearch/`, which is where they lived when each entry was written. The repo was
+> reorganised on 2026-08-24: experiment scripts are now in **`stage1_manual/`** and the pipeline in
+> **`stage2_autosearch/`** (invoked as `python -m stage2_autosearch`). Paths are left as-written
+> rather than rewritten, so the log stays an accurate record of what was run when.
+
 Running record of **everything tried**, including things that didn't work. Negative results are
 as valuable as positive ones here: the write-up asks explicitly "which transformations you tested"
 and "what characteristics appear to trigger the false positives," and that argument is much

@@ -74,6 +74,22 @@ misclassifications, rather than one-off manual edits.
       what characteristics seem to trigger the false positives, production mitigation approach,
       and how to design a system to catch future false positives
 
+## ⚠️ This project now has its OWN git repo
+`github.com/pfornia/thorn-takehome` (private), created 2026-08-24. The files live at this path
+inside the personal-assistant working tree for workflow continuity, but **personal-assistant
+gitignores this folder** — commit and push from *here*, not from the parent repo.
+
+## Status (2026-08-24)
+Investigation complete (E000–E011); all three complaints reproduce above the 99% tier, and the
+three candidates pass Thorn's provided `test_false_positives.py` at the hard threshold. Final
+images are in `homework/deliverables/` (tracked) with `SCORES.md`.
+
+Automated pipeline built: `homework/autosearch/`. Two-stage search (coarse grid → local refine).
+It has already found configurations the manual sweep missed.
+
+**Remaining: the write-up.** Five sections required, and per the assignment's rule Claude must not
+draft the reasoning — see the collaboration constraint below.
+
 ## Project files
 - `prompt.md` — the assignment as emailed (verbatim).
 - `homework/HOMEWORK.md` — **authoritative** version, bundled in the zip; more specific than the

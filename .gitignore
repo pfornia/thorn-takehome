@@ -1,0 +1,15 @@
+# Provided by Thorn in the assignment zip — large binaries, recoverable from the original
+# download, not our work product.
+homework/model.pt
+homework/images/
+
+# Python env
+homework/.venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Bulk experiment scratch output. Thousands of generated candidates; regenerate by re-running
+# the exp_*.py scripts. Final selected deliverables live in homework/deliverables/ (tracked).
+homework/outputs/
+homework/tmp_trainer/

@@ -1,0 +1,17 @@
+[project]
+name = "interview-homework"
+version = "0.1.0"
+description = "Thorn interview homework assignment for ML engineering"
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "torchvision",
+    "pillow",
+    "pytest",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = [".."]

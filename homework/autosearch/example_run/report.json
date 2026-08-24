@@ -1,0 +1,509 @@
+{
+  "uf1": {
+    "user_feedback": "uf1",
+    "name": "UF1 - grid / collage with lines running through",
+    "complaint": "I'm seeing a lot of bad predictions where the image is sort of like a grid or collage and they seem to have lots of lines running through them",
+    "transform": "collage",
+    "target_label": "dog",
+    "target_prob": 0.99,
+    "target_met": true,
+    "candidates_scored": 348,
+    "stage1_evaluated": 150,
+    "stage1_crossings": 59,
+    "stage2_evaluated": 193,
+    "baseline": [
+      {
+        "image": "forest",
+        "pred": "other",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.0,
+          "other": 1.0
+        }
+      },
+      {
+        "image": "ocean",
+        "pred": "other",
+        "probs": {
+          "cat": 5e-06,
+          "dog": 7e-06,
+          "other": 0.999988
+        }
+      },
+      {
+        "image": "rav4",
+        "pred": "other",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.0,
+          "other": 1.0
+        }
+      },
+      {
+        "image": "woman",
+        "pred": "other",
+        "probs": {
+          "cat": 0.0,
+          "dog": 1e-06,
+          "other": 0.999999
+        }
+      },
+      {
+        "image": "man",
+        "pred": "other",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.0,
+          "other": 1.0
+        }
+      }
+    ],
+    "best": {
+      "transform": "collage",
+      "image": "__mixed__",
+      "params": {
+        "grid": 8,
+        "line_width": 8,
+        "line_color": "black",
+        "source_mode": "mixed",
+        "seed": 283372
+      },
+      "pred": "dog",
+      "probs": {
+        "cat": 0.000776,
+        "dog": 0.999087,
+        "other": 0.000137
+      },
+      "logit_margin_vs_other": 8.8946
+    },
+    "top": [
+      {
+        "transform": "collage",
+        "image": "__mixed__",
+        "params": {
+          "grid": 8,
+          "line_width": 8,
+          "line_color": "black",
+          "source_mode": "mixed",
+          "seed": 283372
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 0.000776,
+          "dog": 0.999087,
+          "other": 0.000137
+        },
+        "logit_margin_vs_other": 8.8946
+      },
+      {
+        "transform": "collage",
+        "image": "__mixed__",
+        "params": {
+          "grid": 32,
+          "line_width": 4,
+          "line_color": "black",
+          "source_mode": "mixed",
+          "seed": 372141
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 0.075895,
+          "dog": 0.923743,
+          "other": 0.000361
+        },
+        "logit_margin_vs_other": 7.8462
+      },
+      {
+        "transform": "collage",
+        "image": "__mixed__",
+        "params": {
+          "grid": 32,
+          "line_width": 2,
+          "line_color": "black",
+          "source_mode": "mixed",
+          "seed": 1
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 0.021304,
+          "dog": 0.978273,
+          "other": 0.000423
+        },
+        "logit_margin_vs_other": 7.7452
+      },
+      {
+        "transform": "collage",
+        "image": "__mixed__",
+        "params": {
+          "grid": 30,
+          "line_width": 2,
+          "line_color": "black",
+          "source_mode": "mixed",
+          "seed": 2
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 0.135888,
+          "dog": 0.863726,
+          "other": 0.000385
+        },
+        "logit_margin_vs_other": 7.7149
+      },
+      {
+        "transform": "collage",
+        "image": "__mixed__",
+        "params": {
+          "grid": 30,
+          "line_width": 4,
+          "line_color": "black",
+          "source_mode": "mixed",
+          "seed": 2
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 0.063068,
+          "dog": 0.936451,
+          "other": 0.000481
+        },
+        "logit_margin_vs_other": 7.5733
+      }
+    ],
+    "output_image": "/tmp/as_all/uf1___mixed___dog0.9991.png"
+  },
+  "uf2": {
+    "user_feedback": "uf2",
+    "name": "UF2 - watermarks and text",
+    "complaint": "A bunch of the images in my review queue have watermarks and text in them and almost none of them are actually actionable",
+    "transform": "watermark",
+    "target_label": "dog",
+    "target_prob": 0.99,
+    "target_met": true,
+    "candidates_scored": 2062,
+    "stage1_evaluated": 1620,
+    "stage1_crossings": 136,
+    "stage2_evaluated": 89,
+    "baseline": [
+      {
+        "image": "forest",
+        "pred": "other",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.0,
+          "other": 1.0
+        }
+      },
+      {
+        "image": "ocean",
+        "pred": "other",
+        "probs": {
+          "cat": 5e-06,
+          "dog": 7e-06,
+          "other": 0.999988
+        }
+      },
+      {
+        "image": "rav4",
+        "pred": "other",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.0,
+          "other": 1.0
+        }
+      },
+      {
+        "image": "woman",
+        "pred": "other",
+        "probs": {
+          "cat": 0.0,
+          "dog": 1e-06,
+          "other": 0.999999
+        }
+      },
+      {
+        "image": "man",
+        "pred": "other",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.0,
+          "other": 1.0
+        }
+      }
+    ],
+    "best": {
+      "transform": "watermark",
+      "image": "woman",
+      "params": {
+        "font": "Courier New.ttf",
+        "font_size": 10,
+        "spacing": 20,
+        "opacity": 0.85,
+        "color": "white",
+        "angle": 70
+      },
+      "pred": "dog",
+      "probs": {
+        "cat": 0.0,
+        "dog": 0.999999,
+        "other": 1e-06
+      },
+      "logit_margin_vs_other": 14.3772
+    },
+    "top": [
+      {
+        "transform": "watermark",
+        "image": "woman",
+        "params": {
+          "font": "Courier New.ttf",
+          "font_size": 10,
+          "spacing": 20,
+          "opacity": 0.85,
+          "color": "white",
+          "angle": 70
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.999999,
+          "other": 1e-06
+        },
+        "logit_margin_vs_other": 14.3772
+      },
+      {
+        "transform": "watermark",
+        "image": "woman",
+        "params": {
+          "font": "Courier New.ttf",
+          "font_size": 10,
+          "spacing": 20,
+          "opacity": 0.95,
+          "color": "white",
+          "angle": 60
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.999999,
+          "other": 1e-06
+        },
+        "logit_margin_vs_other": 13.9265
+      },
+      {
+        "transform": "watermark",
+        "image": "woman",
+        "params": {
+          "font": "Arial.ttf",
+          "font_size": 10,
+          "spacing": 20,
+          "opacity": 0.75,
+          "color": "white",
+          "angle": 60
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.999998,
+          "other": 2e-06
+        },
+        "logit_margin_vs_other": 13.4058
+      },
+      {
+        "transform": "watermark",
+        "image": "woman",
+        "params": {
+          "font": "Arial.ttf",
+          "font_size": 10,
+          "spacing": 20,
+          "opacity": 0.85,
+          "color": "white",
+          "angle": 75
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 1.4e-05,
+          "dog": 0.999984,
+          "other": 2e-06
+        },
+        "logit_margin_vs_other": 13.3215
+      },
+      {
+        "transform": "watermark",
+        "image": "woman",
+        "params": {
+          "font": "Arial.ttf",
+          "font_size": 10,
+          "spacing": 20,
+          "opacity": 0.8,
+          "color": "white",
+          "angle": 60
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.999998,
+          "other": 2e-06
+        },
+        "logit_margin_vs_other": 13.3123
+      }
+    ],
+    "output_image": "/tmp/as_all/uf2_woman_dog1.0000.png"
+  },
+  "uf3": {
+    "user_feedback": "uf3",
+    "name": "UF3 - messy, hard to make out, low quality",
+    "complaint": "The model is flagging lots of messy looking images that are hard to make out and sort of low quality. The predictions are basically never right on these",
+    "transform": "degrade",
+    "target_label": "dog",
+    "target_prob": 0.99,
+    "target_met": true,
+    "candidates_scored": 2388,
+    "stage1_evaluated": 220,
+    "stage1_crossings": 64,
+    "stage2_evaluated": 101,
+    "baseline": [
+      {
+        "image": "forest",
+        "pred": "other",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.0,
+          "other": 1.0
+        }
+      },
+      {
+        "image": "ocean",
+        "pred": "other",
+        "probs": {
+          "cat": 5e-06,
+          "dog": 7e-06,
+          "other": 0.999988
+        }
+      },
+      {
+        "image": "rav4",
+        "pred": "other",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.0,
+          "other": 1.0
+        }
+      },
+      {
+        "image": "woman",
+        "pred": "other",
+        "probs": {
+          "cat": 0.0,
+          "dog": 1e-06,
+          "other": 0.999999
+        }
+      },
+      {
+        "image": "man",
+        "pred": "other",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.0,
+          "other": 1.0
+        }
+      }
+    ],
+    "best": {
+      "transform": "degrade",
+      "image": "woman",
+      "params": {
+        "kind": "gaussian",
+        "strength": 160,
+        "seed": 896677
+      },
+      "pred": "dog",
+      "probs": {
+        "cat": 0.000199,
+        "dog": 0.9998,
+        "other": 0.0
+      },
+      "logit_margin_vs_other": 14.6457
+    },
+    "top": [
+      {
+        "transform": "degrade",
+        "image": "woman",
+        "params": {
+          "kind": "gaussian",
+          "strength": 160,
+          "seed": 896677
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 0.000199,
+          "dog": 0.9998,
+          "other": 0.0
+        },
+        "logit_margin_vs_other": 14.6457
+      },
+      {
+        "transform": "degrade",
+        "image": "woman",
+        "params": {
+          "kind": "gaussian",
+          "strength": 120,
+          "seed": 386307
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 0.000324,
+          "dog": 0.999675,
+          "other": 1e-06
+        },
+        "logit_margin_vs_other": 13.7214
+      },
+      {
+        "transform": "degrade",
+        "image": "woman",
+        "params": {
+          "kind": "gaussian",
+          "strength": 80,
+          "seed": 768276
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 0.0,
+          "dog": 0.999998,
+          "other": 2e-06
+        },
+        "logit_margin_vs_other": 13.4041
+      },
+      {
+        "transform": "degrade",
+        "image": "woman",
+        "params": {
+          "kind": "gaussian",
+          "strength": 80,
+          "seed": 169541
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 1e-06,
+          "dog": 0.999997,
+          "other": 2e-06
+        },
+        "logit_margin_vs_other": 13.1772
+      },
+      {
+        "transform": "degrade",
+        "image": "woman",
+        "params": {
+          "kind": "gaussian",
+          "strength": 120,
+          "seed": 391185
+        },
+        "pred": "dog",
+        "probs": {
+          "cat": 9e-06,
+          "dog": 0.999989,
+          "other": 2e-06
+        },
+        "logit_margin_vs_other": 13.1124
+      }
+    ],
+    "output_image": "/tmp/as_all/uf3_woman_dog0.9998.png"
+  }
+}

@@ -977,3 +977,62 @@ watermark substrate; at realistic spacing 20, woman crushes it (0.9998 vs 0.9233
 
 Recommend **C** or **A**: C is the most plausible-looking as a stock watermark (Arial, 30°, moderate
 opacity) while still hitting 0.9998; A is the headline number.
+
+---
+
+### E012 — ✅ AUTOMATED PIPELINE validated end to end (2026-08-24)
+
+Built `homework/autosearch/` to formalise the manual process. Two stages: coarse grid over
+`config.json`, then local refinement around the top-K (numeric deltas + fresh random seeds).
+Full design rationale in `autosearch/README.md`.
+
+**Single command, all three complaints, five base images:**
+
+```bash
+python -m autosearch --uf all --images images/*.jpg images/*.jpeg --out results/
+```
+
+| complaint | target met | best dog | stage 1 evaluated | stage 1 crossings | stage 2 evaluated |
+|---|---|---|---|---|---|
+| uf1 | ✅ | 0.9991 | 150 | 59 | 193 |
+| uf2 | ✅ | **1.0000** | 1620 | 136 | 89 |
+| uf3 | ✅ | 0.9998 | 220 | 64 | 101 |
+
+**2,388 candidates scored in 6m07s** on CPU/MPS, all three targets met.
+
+Winning parameter sets found autonomously:
+- uf1: `grid=8, line_width=8, black, mixed, seed=283372`
+- uf2: `Courier New 10pt, spacing=20, opacity=0.85, white, angle=70°`
+- uf3: `gaussian, strength=160, seed=896677`
+
+**Finding 1 — 🔥 The pipeline found a configuration the manual sweep dismissed.** It selected
+**grid=8** for UF1 at dog 0.9991. E009's manual sweep tested grid 8 at a *single seed* (42), got a
+maximum of 0.46 across all widths and colours, and concluded "grid 8 also fails; usable window is
+roughly 10–32." That conclusion was **wrong, and wrong for a methodological reason**: one sample
+per cell cannot distinguish "this configuration doesn't work" from "this seed didn't work." The
+automated seed search corrected it. Worth stating plainly in the write-up — it's a concrete
+argument for automating the search rather than hand-sweeping.
+
+Note grid 8 is also *more* visually plausible as a real collage than grid 10 (64 tiles vs 100).
+
+**Finding 2 — independently converged on the manual UF2 optimum.** The search landed on Courier New
+10pt at **70°**; the manual E011 sweep landed on Copperplate 10pt at **75°**. Different font
+families, near-identical angle and identical size, both at dog ≈ 1.0000. Two independent searches
+agreeing on `size=10` and a ~70–75° rotation is meaningful corroboration that those are the real
+levers, not artefacts.
+
+**Finding 3 — performance work was necessary, and the bottleneck was not the model.** The first
+full run was killed after >10 minutes stuck on UF2. Cause: the watermark overlay was being
+re-rendered (~900 individual glyph draws) for every base image, when the overlay depends only on
+its own parameters. Caching the layer by parameter set, plus trimming an over-large UF2 grid
+(1,920 configs was not the "quick" first stage the design intends), brought the whole three-complaint
+run to about 6 minutes. Scoring was never the constraint; image generation was.
+
+**Finding 4 — verification.** All three manual candidates pass Thorn's provided
+`tests/test_false_positives.py` at the **hard (99%) threshold**:
+```bash
+FALSE_POSITIVE_DIR=deliverables/ pytest tests/test_false_positives.py   # 4 passed
+```
+Plus 22 tests for the pipeline itself, including one asserting batched scoring agrees with
+one-at-a-time scoring, and one asserting transforms are deterministic so any reported result is
+reproducible from its recorded parameters and seed.

@@ -4,6 +4,7 @@
 > the submission. For the final project write-up, authored by Paul Fornia, see:
 > https://docs.google.com/document/d/1SnItar5idhUFMzAfGKthkYRc5UXC5EN79XLYeoX7yhg
 
+
 Running record of **everything tried**, including things that didn't work. Negative results are
 as valuable as positive ones here: the write-up asks explicitly "which transformations you tested"
 and "what characteristics appear to trigger the false positives," and that argument is much
@@ -25,7 +26,7 @@ verdict, and any observation worth carrying forward.
 - Base images (all currently classified "other" with >99% confidence, per the provided test):
   `man.jpeg`, `woman.jpg`, `rav4.jpg`, `forest.jpg`, `ocean.jpg`.
 
-### Scoring is graded — discovered in `tests/test_false_positives.py`
+### Scoring is graded — discovered in `homework/tests/test_false_positives.py`
 The provided tests check the false-positive images at **three difficulty tiers**, all computed in
 logit space against `logsumexp`:
 - **Easy:** best cat/dog probability > **10%**
@@ -151,7 +152,7 @@ Env created with `uv sync` in `homework/` (torch 2.13.0, torchvision 0.28.0, pil
 pytest 9.1.1). Note `uv run` emits a harmless `VIRTUAL_ENV` mismatch warning because Paul's shell
 has anaconda active; ignore it, `.venv` is what's used.
 
-Wrote `homework/score.py` — loads the checkpoint once, returns the full softmax vector, raw logits,
+Wrote `stage1_manual/score.py` — loads the checkpoint once, returns the full softmax vector, raw logits,
 argmax, and the best non-"other" probability (the quantity the provided tests actually grade).
 
 **Baseline probabilities (unmodified base images):**
@@ -208,7 +209,7 @@ Paul's idea: render plain black words on white and score them. If "Dog" beats co
 model has OCR-like semantic sensitivity and watermark *wording* matters. If not, any watermark
 effect is texture/layout-driven.
 
-Setup: `homework/exp_text_only.py`. Arial 160pt, black, centred, 512×512 white canvas. Includes a
+Setup: `stage1_manual/exp_text_only.py`. Arial 160pt, black, centred, 512×512 white canvas. Includes a
 **blank white control** to separate "effect of the word" from "effect of a mostly-white canvas."
 
 | rendered | dog_margin | dog_prob | cat_prob |
@@ -274,7 +275,7 @@ requires images that "definitely do not depict a cat or dog"; these fail that cl
 Purpose: establish an upper bound. If an explicit dog shape doesn't move the model, shape is
 irrelevant and the entire search should be texture/content-driven.
 
-Setup: `homework/exp_shape_probe.py`. ASCII rendered in Andale Mono, black on white, 512².
+Setup: `stage1_manual/exp_shape_probe.py`. ASCII rendered in Andale Mono, black on white, 512².
 Mosaic = tiles cropped from the five base images, brightness-modulated by a dog-silhouette mask
 (inside tiles kept at 1.0×, outside darkened to 0.25×). Flat-mask control uses identical machinery
 with a uniform mask, isolating the effect of the shape.
@@ -348,7 +349,7 @@ prior. If so it's an *asymptote*, not a building block — destroying informatio
 toward the prior (~4.6% dog), never to the 50% needed. Test: score many different information-free
 images. Tight cluster ⇒ prior. Wide spread ⇒ still feature-driven.
 
-Setup: `homework/exp_prior_probe.py`. Solid colours, structureless noise, and real photos blurred
+Setup: `stage1_manual/exp_prior_probe.py`. Solid colours, structureless noise, and real photos blurred
 to featurelessness.
 
 **Result 1 — ✅ PAUL'S HYPOTHESIS CONFIRMED for *smooth* featureless images.**
@@ -425,7 +426,7 @@ result that plausibly matches a user complaint.
 
 ### E004 — ✅✅ NOISE SWEEP ON REAL BASE IMAGES — deliverable-quality results (2026-08-21)
 
-Setup: `homework/exp_noise_sweep.py`. Three parameterisations applied to all five base photos,
+Setup: `stage1_manual/exp_noise_sweep.py`. Three parameterisations applied to all five base photos,
 resized to 512². Images saved under `outputs/e004_*`.
 
 #### A. Additive gaussian noise (σ) — **all five base images cross to `dog`**
@@ -497,7 +498,7 @@ on a photograph. Convenient: the deliverable wants dog.
 
 ### E005 — ✅ WATERMARK / TEXT OVERLAY (UF2) — texture hypothesis confirmed (2026-08-21)
 
-Setup: `homework/exp_watermark.py`. Tiled diagonal watermark (stock-photo style), 30°, white,
+Setup: `stage1_manual/exp_watermark.py`. Tiled diagonal watermark (stock-photo style), 30°, white,
 `"© SAMPLE"`. Wording held fixed — E001 established text content is irrelevant. Four sweeps
 designed to test the prediction from `strategy.md`: **if texture is the mechanism, glyph scale and
 density should dominate opacity, and a single large wordmark should fail.**
@@ -578,7 +579,7 @@ Claude's stated prediction beforehand: after the fixed 224² resize, **tiling mu
 frequency by N (→ more dog-like)** while **cropping/upscaling divides it (→ less dog-like)**, so the
 deltas should have opposite signs.
 
-Setup: `homework/exp_scale_frequency.py`. `tile_N` = same image repeated N×N, no borders.
+Setup: `stage1_manual/exp_scale_frequency.py`. `tile_N` = same image repeated N×N, no borders.
 `crop_1/N` = one centre sub-tile blown back up. `down_Nx` = downscale+upscale, framing preserved.
 
 **Absolute dog_margin** (prior ≈ −2.5):
@@ -642,7 +643,7 @@ property. Worth being precise about this in the write-up rather than claiming "i
 
 ### E007 — 🏆 COLLAGE/GRID (UF1) — the control won: GRID LINES ALONE are the strongest trigger found
 
-Setup: `homework/exp_collage.py`. Four sweeps: (A) finer tiling, (B) grid lines on 12×12 tiling,
+Setup: `stage1_manual/exp_collage.py`. Four sweeps: (A) finer tiling, (B) grid lines on 12×12 tiling,
 (C) mixed-source collage, (D) **control — grid lines drawn over the *unmodified* photo, no tiling
 at all**, included purely to isolate the line contribution.
 
@@ -712,7 +713,7 @@ genuine multi-image collage is the better match to the complaint. E007's sweep C
 under-explored this: 7 configs, one seed, and line widths of only 0 or 2 — **never 1px**, despite
 1px being the clear winner in the lines-only sweep, and never finer than 24×24.
 
-Setup: `homework/exp_collage2.py`. Each tile is a random square crop drawn from **all five** base
+Setup: `stage1_manual/exp_collage2.py`. Each tile is a random square crop drawn from **all five** base
 images, arranged on an N×N grid, with optional grid lines. Swept grid × line width × line colour ×
 seed.
 
@@ -773,9 +774,9 @@ Option C trades ~3 points of confidence for a much better match to the actual us
 real user would produce. Real collages have relatively few, visibly distinct photos. Find the best
 result at grid ≤ 16.
 
-Design note: E008 capped line width at 3px, which is likely too thin at coarse densities. At 32×32 a
-1px line is ~6% of a tile's width; at 10×10 it's ~2%. This sweep scales line widths up accordingly
-(2–16px) across grids 3–16, both line colours.
+Setup: `stage1_manual/exp_collage3.py`. Design note: E008 capped line width at 3px, which is likely
+too thin at coarse densities. At 32×32 a 1px line is ~6% of a tile's width; at 10×10 it's ~2%. This
+sweep scales line widths up accordingly (2–16px) across grids 3–16, both line colours.
 
 **Best coarse results (grid ≤ 16), dog probability:**
 
@@ -826,7 +827,7 @@ Paul's question: how seed-sensitive is `g10_w8_black`, and does it need tiles fr
 images or would a single source do? This separates two things the candidate confounds — the
 **periodic grid structure** vs. the **diversity of tile content**.
 
-Setup: `homework/exp_collage_seeds.py`. Grid/width/colour held fixed at the winner (10×10, 8px,
+Setup: `stage1_manual/exp_collage_seeds.py`. Grid/width/colour held fixed at the winner (10×10, 8px,
 black). (A) 30 seeds drawing tiles from all five images. (B) 10 seeds per base image, tiles drawn
 from **one** image only.
 
@@ -916,7 +917,7 @@ distribution and a no-gutter control at dog 0.00.
 **Motivation (Paul, 2026-08-24):** spacing 10–14 is too dense to pass as a real watermark. Freeze
 **spacing = 20** and search the levers E005 never touched.
 
-Setup: `homework/exp_watermark2.py`. 720 configs per base image: 12 font families × 5 sizes × 4
+Setup: `stage1_manual/exp_watermark2.py`. 720 configs per base image: 12 font families × 5 sizes × 4
 opacities × 3 colours, at spacing 20 / 30°. Then a rotation sweep on the winner.
 
 Baselines to beat: woman 0.614, forest 0.602 at spacing ≥20 (0.822 was the *unrealistically* dense
@@ -986,14 +987,14 @@ opacity) while still hitting 0.9998; A is the headline number.
 
 ### E012 — ✅ AUTOMATED PIPELINE validated end to end (2026-08-24)
 
-Built `homework/autosearch/` to formalise the manual process. Two stages: coarse grid over
+Built `stage2_autosearch/` to formalise the manual process. Two stages: coarse grid over
 `config.json`, then local refinement around the top-K (numeric deltas + fresh random seeds).
-Full design rationale in `autosearch/README.md`.
+Full design rationale in `stage2_autosearch/README.md`.
 
 **Single command, all three complaints, five base images:**
 
 ```bash
-python -m autosearch --uf all --images images/*.jpg images/*.jpeg --out results/
+python -m stage2_autosearch --uf all --images homework/images/* --out results/
 ```
 
 | complaint | target met | best dog | stage 1 evaluated | stage 1 crossings | stage 2 evaluated |
@@ -1033,9 +1034,9 @@ its own parameters. Caching the layer by parameter set, plus trimming an over-la
 run to about 6 minutes. Scoring was never the constraint; image generation was.
 
 **Finding 4 — verification.** All three manual candidates pass Thorn's provided
-`tests/test_false_positives.py` at the **hard (99%) threshold**:
+`homework/tests/test_false_positives.py` at the **hard (99%) threshold**:
 ```bash
-FALSE_POSITIVE_DIR=deliverables/ pytest tests/test_false_positives.py   # 4 passed
+FALSE_POSITIVE_DIR=deliverables/false_positives pytest tests/test_false_positives.py   # 4 passed
 ```
 Plus 22 tests for the pipeline itself, including one asserting batched scoring agrees with
 one-at-a-time scoring, and one asserting transforms are deterministic so any reported result is

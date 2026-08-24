@@ -18,11 +18,13 @@ from pathlib import Path
 import torch
 from PIL import Image
 
-# model.py lives one level up (it is Thorn's provided module, left untouched)
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+# Thorn's model.py lives in homework/ and is left untouched; put it on the path rather than
+# copying it, so the provided module stays the single source of truth.
+REPO_ROOT = Path(__file__).resolve().parent.parent
+HOMEWORK_DIR = REPO_ROOT / "homework"
+sys.path.insert(0, str(HOMEWORK_DIR))
 from model import MobileNetSmall  # noqa: E402
 
-HOMEWORK_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_CHECKPOINT = HOMEWORK_DIR / "model.pt"
 
 

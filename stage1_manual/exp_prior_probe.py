@@ -14,7 +14,7 @@ that's a prior/fallback. If they vary widely, the model is still responding to f
 import numpy as np
 from PIL import Image, ImageFilter
 
-from score import HOMEWORK_DIR, format_score, score_image
+from score import HOMEWORK_DIR, OUTPUTS_DIR, format_score, score_image
 
 CANVAS = 512
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
         for radius in (32, 96, 200):
             cases.append((f"blur{radius}_{base.split('.')[0]}", blurred_to_death(p, radius)))
 
-    out_dir = HOMEWORK_DIR / "outputs" / "e003_prior"
+    out_dir = OUTPUTS_DIR / "e003_prior"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     results = []

@@ -7,20 +7,33 @@
 All scores produced by the provided `model.py` + `model.pt`, unmodified. Reproduce with:
 
 ```bash
-cd homework
 uv run python -c "
-from autosearch.scoring import Scorer; from PIL import Image; from pathlib import Path
+from stage2_autosearch.scoring import Scorer; from PIL import Image; from pathlib import Path
 s = Scorer()
-for p in sorted(Path('deliverables').glob('*.png')) + sorted(Path('deliverables').glob('*.jpg')):
+for p in sorted(Path('deliverables').rglob('*.png')) + sorted(Path('deliverables').rglob('*.jpg')):
     r = s.score(Image.open(p)); print(p.name, r.pred, r.probs)
 "
 ```
 
-Or run the provided test suite against them:
+Or run Thorn's provided test suite against the false positives:
 
 ```bash
-FALSE_POSITIVE_DIR=deliverables/ uv run pytest tests/test_false_positives.py
+cd homework
+FALSE_POSITIVE_DIR=../deliverables/false_positives uv run --project .. pytest tests/test_false_positives.py
+# 4 passed  (includes the hard 99% threshold)
 ```
+
+**Point it at `false_positives/` specifically, not at `deliverables/`.** The provided test asserts
+that *every* image in the directory is a cat/dog false positive, and `controls/` and `originals/`
+are deliberately `other` — so aiming it at the parent directory fails by design.
+
+## Layout
+
+| folder | contents |
+|---|---|
+| `false_positives/` | the three deliverables. Point `FALSE_POSITIVE_DIR` here. |
+| `originals/` | the unmodified base images they were made from |
+| `controls/` | images that deliberately do **not** cross, included as evidence for the mechanism |
 
 ## The three false positives
 

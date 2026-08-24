@@ -12,7 +12,7 @@ import random
 
 from PIL import Image, ImageDraw
 
-from score import HOMEWORK_DIR, score_image
+from score import HOMEWORK_DIR, OUTPUTS_DIR, score_image
 
 CANVAS = 512
 BASES = ["ocean.jpg", "woman.jpg", "forest.jpg", "man.jpeg", "rav4.jpg"]
@@ -76,7 +76,7 @@ def lines_only(img, n, line_w=2, line_color=(255, 255, 255)):
 
 
 def run(label, variants, out_sub, bases=BASES):
-    out_dir = HOMEWORK_DIR / "outputs" / out_sub
+    out_dir = OUTPUTS_DIR / out_sub
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"\n{'='*112}\n{label}\n{'='*112}")
     hdr = f"{'variant':>22} | " + " | ".join(f"{b.split('.')[0]:>14}" for b in bases)

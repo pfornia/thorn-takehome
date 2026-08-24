@@ -13,7 +13,7 @@ import random
 
 from PIL import Image, ImageDraw
 
-from score import HOMEWORK_DIR, score_image
+from score import HOMEWORK_DIR, OUTPUTS_DIR, score_image
 
 CANVAS = 512
 BASES = ["ocean.jpg", "woman.jpg", "forest.jpg", "man.jpeg", "rav4.jpg"]
@@ -49,7 +49,7 @@ def mixed_collage(bases, n, line_w=1, line_color=(255, 255, 255), seed=0, min_cr
 
 
 if __name__ == "__main__":
-    out_dir = HOMEWORK_DIR / "outputs" / "e009_coarse"
+    out_dir = OUTPUTS_DIR / "e009_coarse"
     out_dir.mkdir(parents=True, exist_ok=True)
     bases = load_bases()
 

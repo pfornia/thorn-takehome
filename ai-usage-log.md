@@ -13,8 +13,8 @@
 
 ## What the AI did
 
-**Code.** Wrote all the experiment scripts (`homework/exp_*.py`) and the automated search package
-(`homework/autosearch/`), including the transformation library, batched scoring wrapper, two-stage
+**Code.** Wrote all the experiment scripts (`stage1_manual/exp_*.py`) and the automated search package
+(`stage2_autosearch/`), including the transformation library, batched scoring wrapper, two-stage
 search engine, CLI, config schema, and tests. Ran them and reported the numbers.
 
 **Environment.** Set up the `uv` virtual environment; extracted and organised the assignment zip.
@@ -75,7 +75,7 @@ Recorded because they show what was verified rather than accepted:
 The pipeline searches **transformation parameters** (grid size, gutter width, font size, rotation,
 noise sigma, random seed), never pixel values. Pixel-level hill-climbing would be an adversarial
 perturbation, which the assignment forbids, and this distinction was made explicit in the design
-before the search was built (see `strategy.md` and `autosearch/README.md`). The model is queried
+before the search was built (see `strategy.md` and `stage2_autosearch/README.md`). The model is queried
 only as a black box for a score; its weights are never touched and no gradients are used.
 
 **Seed search disclosure:** where a result comes from selecting the best of N random seeds, the

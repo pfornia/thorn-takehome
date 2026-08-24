@@ -10,7 +10,7 @@ image with some dark marks on it".
 
 from PIL import Image, ImageDraw, ImageFont
 
-from score import format_score, score_image
+from score import OUTPUTS_DIR, format_score, score_image
 
 FONT_PATH = "/System/Library/Fonts/Supplemental/Arial.ttf"
 CANVAS = 512
@@ -54,9 +54,9 @@ WORDS = [
 ]
 
 if __name__ == "__main__":
-    from score import HOMEWORK_DIR
+    from score import HOMEWORK_DIR, OUTPUTS_DIR
 
-    out_dir = HOMEWORK_DIR / "outputs" / "e001_text"
+    out_dir = OUTPUTS_DIR / "e001_text"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     print("E001 — plain black text on white, Arial 160pt, 512x512 canvas")

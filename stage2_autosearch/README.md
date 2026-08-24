@@ -15,13 +15,13 @@ Formalises the manual investigation (see `../../experiment-log.md`) into a repea
 
 ```bash
 # one complaint
-python -m autosearch --uf uf1 --images images/*.jpg --out results/
+python -m stage2_autosearch --uf uf1 --images homework/images/* --out results/
 
 # target `cat` instead of `dog` (HOMEWORK.md permits either)
-python -m autosearch --uf all --target-label cat --images images/*.jpg --out results_cat/
+python -m stage2_autosearch --uf all --target-label cat --images homework/images/* --out results_cat/
 
 # all three
-python -m autosearch --uf all --images images/*.jpg images/*.jpeg --out results/
+python -m stage2_autosearch --uf all --images homework/images/* --out results/
 
 # useful flags
 --target-label cat # which class to induce (dog | cat; default dog, or config's target_label)

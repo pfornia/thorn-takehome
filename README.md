@@ -11,27 +11,43 @@ Assignment: [`homework/HOMEWORK.md`](homework/HOMEWORK.md)
 
 ## Layout
 
+The work ran in two stages, and the repo is organised to match.
+
 | path | what it is |
 |---|---|
+| [`homework/`](homework/) | **Thorn's assignment zip, unmodified.** Nothing of ours is in here |
+| [`stage1_manual/`](stage1_manual/) | **Stage 1** — exploratory experiments (E000–E011) that identified the mechanism |
+| [`stage2_autosearch/`](stage2_autosearch/) | **Stage 2** — automated pipeline formalising Stage 1 into a repeatable tool |
+| [`deliverables/`](deliverables/) | the three false positives, their originals, and the controls |
+| [`tests/`](tests/) | tests for the search pipeline (Thorn's own tests stay in `homework/tests/`) |
 | [`experiment-log.md`](experiment-log.md) | full record of every experiment, **including failures and corrections** |
-| [`strategy.md`](strategy.md) | search design, written before running |
-| [`homework/exp_*.py`](homework/) | the manual investigation, E000–E011 |
-| [`homework/autosearch/`](homework/autosearch/) | automated pipeline that formalises the manual process |
-| [`homework/model.py`](homework/model.py) | provided by Thorn, unmodified |
-| [`homework/tests/`](homework/tests/) | provided FP tests, plus tests for the search pipeline |
-| `ai-usage-log.md` | AI tool disclosure |
+| [`strategy.md`](strategy.md) | search design, written before running anything |
+| [`ai-usage-log.md`](ai-usage-log.md) | AI tool disclosure |
 
-Not in git: `model.pt` and `images/` (provided in the assignment zip), `homework/outputs/`
-(thousands of generated candidates; regenerate by re-running the scripts).
+`homework/` is kept pristine deliberately, so the diff between what was provided and what was added
+is unambiguous.
+
+Not in git: `homework/model.pt` and `homework/images/` (restore from the assignment zip), and
+`outputs/` (thousands of generated candidates; regenerate by re-running the scripts).
 
 ## Setup
 
 ```bash
-cd homework
-uv sync
+uv sync                                        # from the repo root
 ```
 
-Restore `model.pt` and `images/` from the assignment zip.
+Then restore `model.pt` and `images/` into `homework/` from the assignment zip.
+
+## Verifying the deliverables
+
+```bash
+cd homework
+FALSE_POSITIVE_DIR=../deliverables/false_positives uv run --project .. pytest tests/test_false_positives.py
+# 4 passed  (includes the hard 99% threshold)
+```
+
+Point it at `false_positives/`, not at `deliverables/` — the latter also holds the originals and
+the controls, which are deliberately `other`.
 
 ## What was found
 
@@ -77,13 +93,12 @@ no animal:
 
 Constraint respected throughout: **no adversarial perturbations, and the model is never modified.**
 Every candidate is a plausible image edit; the search only chooses parameters. See
-[`homework/autosearch/README.md`](homework/autosearch/README.md) for where that line is drawn.
+[`stage2_autosearch/README.md`](stage2_autosearch/README.md) for where that line is drawn.
 
 ## Automated pipeline
 
 ```bash
-cd homework
-python -m autosearch --uf all --images images/*.jpg images/*.jpeg --out results/
+python -m stage2_autosearch --uf all --images homework/images/* --out results/
 ```
 
 Two stages: a coarse grid over the space declared in `autosearch/config.json`, then local

@@ -1178,3 +1178,83 @@ space, not one generic "animal texture" direction that both classes share.
 **Practical conclusion:** stick with `dog` for the deliverables. It is what the submission bullet
 asks for, it clears the hard tier comfortably, and the cat results are better used as *evidence*
 for the mechanism than as submission artefacts.
+
+---
+
+### E015 — Cat deliverables regenerated under a recognisability cap (2026-08-24)
+
+Paul's decision: **submit six images, three `dog` and three `cat`**, and vary the base image so the
+set doesn't lean on `woman.jpg` (the dog UF2 and UF3 deliverables both use it). Also a new hard
+constraint: **cap gaussian σ at 100** — beyond roughly that the subject stops being recognisable,
+which breaks the premise of UF3. The complaint describes messy low-quality user photos, not images
+destroyed beyond recognition.
+
+E014's cat artefacts had not been kept (`results/` is gitignored and was never committed), so this
+regenerates them from scratch under the new constraint.
+
+#### Two mechanical changes
+
+1. **`numeric_max` added to the refine block** (`search.py`, `_neighbors`). Without it the cap
+   leaks: whenever the coarse best lands on the top grid value, a positive delta steps straight over
+   the ceiling. The coarse grid now stops at 100 *and* refine refuses to exceed it.
+2. Coarse `strength` grid for uf3 truncated from `[…, 120, 160]` to `[…, 80, 100]`.
+
+E014's σ=120–180 cat numbers are therefore no longer reproducible from this config. Noted in
+`config.json` rather than silently dropped.
+
+#### Results
+
+| complaint | base | transformation | cat | clears 99%? |
+|---|---|---|---|---|
+| UF1 collage | all five (mixed) | grid 26, 4px **white** gutters, seed 93 | 0.9881 | ❌ misses by 0.0019 |
+| UF2 watermark | `forest.jpg` | Copperplate 18pt, spacing 18, op 0.6, white, **0°** | **0.9963** | ✅ |
+| UF3 noise | `ocean.jpg` | gaussian **σ=80**, seed 6 | 0.8821 | ❌ |
+
+UF2 reproduces E014 exactly (0.9963, identical parameters), which is a useful incidental check that
+the pipeline is deterministic across runs.
+
+**Finding 1 — the σ cap is expensive for cat, and cheap for dog.** Dog UF3 sits at σ=60, well under
+the ceiling, so the dog deliverables are untouched. Cat UF3 drops from 0.9771 (σ=160, `rav4`) to
+0.8821 (σ=80, `ocean`). Cat needs more noise energy than dog to cross, so it is the target that runs
+into the recognisability limit first. This is the same dog/cat asymmetry showing up in a third
+independent place.
+
+**Finding 2 — 🔥 `uniform_blend` beats gaussian on the raw number and was rejected anyway.** A
+120-seed sweep found `rav4` at `uniform_blend` α=0.7 reaching cat 0.9359, well above the best capped
+gaussian. But α=0.7 is 70% pure noise, *less* recognisable than σ=100, so it fails the same
+constraint that motivated the cap. Recorded because it is a real result: the cap as literally
+specified (σ only) does not enforce the property it was meant to enforce, and a search will
+cheerfully walk around a constraint expressed in the wrong units.
+
+**Finding 3 — collage density resonance is even sharper for cat, and inverted.** Dog+UF1 peaks at
+grid 8–10 with **black** gutters. Cat+UF1 peaks at grid **26** with **white** gutters, and grid 27
+collapses to 0.4457 — a one-step change in tile count costing 0.54 probability. Grid 23 is similarly
+dead at 0.5147. Neighbouring densities are not neighbouring scores.
+
+**Finding 4 — seed variance dominates parameter choice, again.** At fixed grid 26 / 4px / white,
+400 seeds spanned roughly 0.1 to 0.9881. E010 found this for dog; it holds for cat. Any claim of
+the form "parameter set X fails" is unsafe from a single seed — the same error that made the manual
+E009 sweep discard grid 8, which the automated search later took to dog 0.9991.
+
+**Finding 5 — ⚠️ Thorn's test measures `max(cat, dog)`, not the targeted class.** From
+`tests/test_false_positives.py`: `best_logit = max(logits[i] for i in non_other_indices)`. The
+assertion is per-file across the whole directory, so one sub-threshold image fails the entire run.
+Consequence for the submission: the two sets live in **separate directories**
+(`false_positives/`, `false_positives_cat/`). Merging the six would take a clean 4-passed to a
+failure and bury the fact that the dog set clears the hard tier outright.
+
+Verified:
+
+```
+FALSE_POSITIVE_DIR=../deliverables/false_positives      → 4 passed
+FALSE_POSITIVE_DIR=../deliverables/false_positives_cat  → 3 passed, 1 failed (hard 99%)
+```
+
+**Revision to E014's practical conclusion.** E014 said "stick with `dog` for the deliverables …
+the cat results are better used as evidence for the mechanism than as submission artefacts." Half of
+that still holds and half is now overtaken: the cat set ships as a secondary deliverable, but it
+earns its place *as evidence* rather than as three more passing images. Dog clears the hard tier on
+three complaints out of three; cat on one of three, with a larger search budget. That gap is the
+cleanest quantitative support for the frozen-backbone thesis in the whole investigation — ~120
+ImageNet dog-breed classes against ~7 cat classes, so generic high-frequency texture has a much
+shorter path to `dog`.

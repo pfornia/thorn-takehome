@@ -92,9 +92,19 @@ Everything committed before 2026-08-24 went straight to `main` (7 commits) and w
 rather than retroactively branched.
 
 ## Status (2026-08-24)
-Investigation complete (E000–E011); all three complaints reproduce above the 99% tier, and the
-three candidates pass Thorn's provided `test_false_positives.py` at the hard threshold. Final
-images are in `deliverables/` (tracked) with `SCORES.md`.
+Investigation complete (E000–E015). All three complaints reproduce above the 99% tier for `dog`,
+and those three candidates pass Thorn's provided `test_false_positives.py` at the hard threshold
+(4 passed). Final images are in `deliverables/` (tracked) with `SCORES.md`.
+
+**Six images ship, not three** (Paul, 2026-08-24): three `dog` plus three `cat`, on varied base
+images. They live in **separate directories** — `deliverables/false_positives/` and
+`deliverables/false_positives_cat/` — because Thorn's test asserts its threshold against every file
+in `FALSE_POSITIVE_DIR`, and the cat set only clears 99% on UF2 (UF1 0.9881, UF3 0.8821). Merging
+them would fail the run and hide the dog set's clean pass.
+
+**Gaussian σ is capped at 100** (Paul, 2026-08-24) — beyond that the subject is unrecognisable and
+the image stops resembling the user content UF3 describes. Enforced in both search stages via
+`config.json` → `uf3.refine.numeric_max`. This costs cat real headroom; see E015.
 
 Automated pipeline built: `stage2_autosearch/`. Two-stage search (coarse grid → local refine).
 It has already found configurations the manual sweep missed.

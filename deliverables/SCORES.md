@@ -24,8 +24,8 @@ FALSE_POSITIVE_DIR=../deliverables/false_positives uv run --project .. pytest te
 ```
 
 **Point it at `false_positives/` specifically, not at `deliverables/`.** The provided test asserts
-that *every* image in the directory is a cat/dog false positive, and `controls/` and `originals/`
-are deliberately `other` — so aiming it at the parent directory fails by design.
+that *every* image in the directory is a cat/dog false positive, and `controls/` is deliberately
+`other` — so aiming it at the parent directory fails by design.
 
 ## Layout
 
@@ -33,8 +33,12 @@ are deliberately `other` — so aiming it at the parent directory fails by desig
 |---|---|
 | `false_positives/` | the **primary** deliverables, three `dog` false positives. Point `FALSE_POSITIVE_DIR` here. |
 | `false_positives_cat/` | the same three complaints re-targeted at `cat`. Secondary; see the caveat below. |
-| `originals/` | the unmodified base images they were made from |
 | `controls/` | images that deliberately do **not** cross, included as evidence for the mechanism |
+
+**The "before" image for each pair is the unmodified base photo in `homework/images/`**, named in
+the transformation tables below. They are not duplicated here: every copy would be byte-identical to
+a file already in the repo, and `ocean.jpg` and `woman.jpg` alone accounted for about 4.8 MB of
+duplication across the two sets.
 
 The two false-positive sets are kept in **separate directories on purpose.** Thorn's test asserts a
 threshold against *every* file in `FALSE_POSITIVE_DIR`, so a single sub-threshold image fails the
@@ -46,7 +50,7 @@ clears the hard tier outright.
 
 | user complaint | image | pred | dog | cat | other | logit margin |
 |---|---|---|---|---|---|---|
-| — | `UF2_watermark_ORIGINAL_woman.jpg` (unmodified) | `other` | 0.0000 | 0.0000 | 1.0000 | −13.68 |
+| — | `homework/images/woman.jpg` (unmodified, the "before" for UF2 and UF3) | `other` | 0.0000 | 0.0000 | 1.0000 | −13.68 |
 | **UF1** grid/collage | `UF1_collage_MODIFIED_dog0.9992.png` | **`dog`** | **0.9992** | 0.0004 | 0.0004 | **+7.81** |
 | **UF2** watermark/text | `UF2_watermark_MODIFIED_dog0.9998.png` | **`dog`** | **0.9998** | 0.0000 | 0.0002 | **+8.34** |
 | **UF3** messy/low quality | `UF3_noise_MODIFIED_dog1.000.png` | **`dog`** | **0.9986** | 0.0002 | 0.0012 | **+6.70** |
@@ -73,8 +77,8 @@ to show the effect is not a property of one photograph.
 
 | user complaint | image | pred | cat | dog | other | cat margin |
 |---|---|---|---|---|---|---|
-| — | `UF2_watermark_ORIGINAL_forest.jpg` (unmodified) | `other` | 0.000000 | 0.000000 | 1.000000 | −26.48 |
-| — | `UF3_noise_ORIGINAL_ocean.jpg` (unmodified) | `other` | 0.000005 | 0.000007 | 0.999988 | −12.14 |
+| — | `homework/images/forest.jpg` (unmodified, the "before" for UF2) | `other` | 0.000000 | 0.000000 | 1.000000 | −26.48 |
+| — | `homework/images/ocean.jpg` (unmodified, the "before" for UF3) | `other` | 0.000005 | 0.000007 | 0.999988 | −12.14 |
 | **UF1** grid/collage | `UF1_collage_MODIFIED_cat0.9881.png` | **`cat`** | 0.9881 🟡 | 0.0084 | 0.0034 | **+4.76** |
 | **UF2** watermark/text | `UF2_watermark_MODIFIED_cat0.9963.png` | **`cat`** | **0.9963** ✅ | 0.0009 | 0.0029 | **+5.84** |
 | **UF3** messy/low quality | `UF3_noise_MODIFIED_cat0.8821.png` | **`cat`** | 0.8821 🟡 | 0.1112 | 0.0067 | **+2.07** |

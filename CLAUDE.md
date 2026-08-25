@@ -109,8 +109,8 @@ the image stops resembling the user content UF3 describes. Enforced in both sear
 Automated pipeline built: `stage2_autosearch/`. Two-stage search (coarse grid → local refine).
 It has already found configurations the manual sweep missed.
 
-**Remaining: the write-up.** Five sections required, and per the assignment's rule Claude must not
-draft the reasoning — see the collaboration constraint below.
+**Submitted 2026-08-24**, a day ahead of the Tue/Wed deadline. The written explanation is the Google
+Doc linked at the top of `README.md`.
 
 ## Project files
 - `prompt.md` — the assignment as emailed (verbatim).
